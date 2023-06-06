@@ -1,11 +1,13 @@
 # SPDX-FileCopyrightText: 2023-present Guillaume Collet <bilouweb@free.fr>
 #
 # SPDX-License-Identifier: CECILL-2.1
+import json
 import sys
 
 import click
 
 from waccess.__about__ import __version__
+from waccess.report import Criterion, Report
 from waccess.utils import read_criteria_config, read_websites
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
@@ -32,6 +34,12 @@ def waccess(websites, criteria, output, output_format):
     """
     crit_dict = DEFAULT_CRIT_DICT
     if criteria:
+        click.echo(f"Read criteria from {criteria}")
         crit_dict = read_criteria_config(criteria)
-    click.echo(crit_dict, file=output)
-    click.echo(read_websites(websites), file=output)
+    else :
+        click.echo("Use default criteria")
+    crit_list = [Criterion(crit, checkers) for crit, checkers in crit_dict.items()]
+    websites = read_websites(websites)
+    click.echo(f"Analysis of {len(websites)} websites...")
+    report = {label : Report(label, url, crit_list).execute() for label, url in websites}
+    click.echo(json.dumps(report, sort_keys=True, indent=4), file=output)

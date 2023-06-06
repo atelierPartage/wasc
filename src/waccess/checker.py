@@ -44,7 +44,7 @@ class AbstractChecker(abc.ABC) :
         self.__description = description
 
     @property
-    def description(self) :
+    def name(self) :
         """
         Returns the description of the checker
 
@@ -60,7 +60,7 @@ class AbstractChecker(abc.ABC) :
         return self.__description
 
     @abc.abstractmethod
-    def execute(self, web_page: BeautifulSoup, url: str = "") -> dict:
+    def execute(self, web_page: BeautifulSoup, url: str = ""):
         """
         Abstract method that needs to be implemented in subclasses
 
@@ -71,6 +71,6 @@ class AbstractChecker(abc.ABC) :
 
         Returns
         -------
-         : dict
-            A dictionary containing the results of the execution
+         : ?
+            The data representing the result of the checker
         """

@@ -32,6 +32,7 @@ dependencies = [
   "pyyaml",
   "beautifulsoup4",
   "requests",
+  "tqdm",
 ]
 
 [project.urls]

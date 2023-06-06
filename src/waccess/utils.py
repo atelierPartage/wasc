@@ -47,4 +47,4 @@ def read_websites(file) :
      : dict
         A dictionary of websites (keys are labels and values URLs)
     """
-    return {line[0].strip() : line[1].strip() for line in csv.reader(file)}
+    return [(line[0].strip(), line[1].strip()) for line in csv.reader(file)]

@@ -33,11 +33,11 @@ import requests
 
 from waccess.checker import AbstractChecker
 
-ACC_STR    = "Accessibilité : "
-ACC_SEC    = "Accessibilité\xa0: "
-TOTAL_CONF = "totalement conforme"
-PART_CONF  = "partiellement conforme"
-NON_CONF   = "non conforme"
+HEADER = {
+    "user-agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 \
+        (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36" ,
+    "referer" : "https://www.google.com/"
+    }
 
 ACCESSIBILITY_PATTERN = re.compile("Accessibilité[ \xa0]: (.*) conforme", re.IGNORECASE)
 
@@ -66,7 +66,7 @@ class FLBT01(AbstractChecker) :
         """
         super().__init__("FLBT01")
 
-    def execute(self, web_page : bs4.BeautifulSoup, url : str) -> dict :  # noqa: ARG002
+    def execute(self, web_page : bs4.BeautifulSoup, url : str):  # noqa: ARG002
         """
         This method performs the test on the beautifulsoup object passed in parameter and returns
         the number of head tags of the web page
@@ -83,7 +83,7 @@ class FLBT01(AbstractChecker) :
         dict :
             The name of the checker is the key and the number of head tags is the value
         """
-        return {self.name : len(web_page.find_all("head"))}
+        return len(web_page.find_all("head"))
 
 class FLBT02(AbstractChecker) :
     """FLBT02
@@ -110,7 +110,7 @@ class FLBT02(AbstractChecker) :
         """
         super().__init__("FLBT02")
 
-    def execute(self, web_page : bs4.BeautifulSoup, url : str) -> dict :
+    def execute(self, web_page : bs4.BeautifulSoup, url : str):
         """
         This method performs the test on the beautifulsoup object passed in parameter and returns
         the depth of head tag(s) of the web page
@@ -128,14 +128,14 @@ class FLBT02(AbstractChecker) :
             The name of the checker is the key and the value is the list of depth of head tags
         """
         checker_01 = FLBT01()
-        head_tag = checker_01.execute(web_page, url)[checker_01.name]
+        head_tag = checker_01.execute(web_page, url)
         if not head_tag :
-            return {self.name : False}
-        result_dict = {self.name : []}
+            return False
+        result = []
         for tag in web_page.find_all("head", limit = head_tag) :
             depth = len(list(tag.parents)) - 1
-            result_dict[self.name].append(depth)
-        return result_dict
+            result.append(depth)
+        return result
 
 class FLBT03(AbstractChecker) : #Mettre à jour docstrings
     """FLBT03
@@ -162,7 +162,7 @@ class FLBT03(AbstractChecker) : #Mettre à jour docstrings
         """
         super().__init__("FLBT03")
 
-    def execute(self, web_page : bs4.BeautifulSoup, url : str) -> dict :  # noqa: ARG002
+    def execute(self, web_page : bs4.BeautifulSoup, url : str):  # noqa: ARG002
         """
         This method performs the test on the beautifulsoup object passed in parameter and determines
         if there is no mention "Accessibilité" or "Accessibility", or the level of
@@ -184,9 +184,7 @@ class FLBT03(AbstractChecker) : #Mettre à jour docstrings
             "Totalement", "Partiellement", "non", ect
         """
         mention =  web_page.find(string = ACCESSIBILITY_PATTERN)
-        if mention :
-            return {self.name : mention}
-        return {self.name : False}
+        return mention if mention else False
 
 class FLBT04(AbstractChecker) :
     """FLBT04
@@ -236,7 +234,7 @@ class FLBT04(AbstractChecker) :
             return url + tmp_url[3:]
         return url + tmp_url
 
-    def execute(self, web_page : bs4.BeautifulSoup, url : str) -> dict :
+    def execute(self, web_page : bs4.BeautifulSoup, url : str):
         """
         This method performs the test on the beautifulsoup object passed in parameter and determines
         if the mention "Accessibilité" / "Accessibility" is a link or not
@@ -254,16 +252,16 @@ class FLBT04(AbstractChecker) :
             The name of the checker is the key and the value is either False if the mention
             "Accessibilité" / "Accessibility" is not a link, or it returns the URL of the link (str)
         """
-        access_tag =  web_page.find(string = ACCESSIBILITY_PATTERN).parent
+        access_tag =  web_page.find(string = ACCESSIBILITY_PATTERN)
         if access_tag :
-            while access_tag.name != "a" and access_tag.name != "html":
+            while access_tag and access_tag.name != "a" and access_tag.name != "html":
                 access_tag = access_tag.parent
             try :
                 tmp_url = access_tag.attrs["href"]
             except KeyError :
-                return {self.name : False}
-            return {self.name : self.get_access_url(tmp_url, url)}
-        return {self.name : False}
+                return False
+            return self.get_access_url(tmp_url, url)
+        return False
 
 class FLBT05(AbstractChecker) :
     """FLBT05
@@ -290,7 +288,7 @@ class FLBT05(AbstractChecker) :
         """
         super().__init__("FLBT05")
 
-    def execute(self, web_page : bs4.BeautifulSoup, url : str) -> dict :
+    def execute(self, web_page : bs4.BeautifulSoup, url : str):
         """
         This method performs the test on the beautifulsoup object passed in parameter and determines
         if there is a compliance rate (%) on the accessibility statement web page or not
@@ -309,14 +307,14 @@ class FLBT05(AbstractChecker) :
             compliance rate (%), or the compliance rate (%)
         """
         checker_04 = FLBT04()
-        access_url = checker_04.execute(web_page, url)[checker_04.name]
+        access_url = checker_04.execute(web_page, url)
         if not access_url :
-            return {self.name : False }
-        response = requests.get(access_url, timeout = 1)
+            return False
+        response = requests.get(access_url, headers=HEADER, timeout = 1)
         if response.status_code == requests.codes.ok :
             access_page = bs4.BeautifulSoup(response.content, "html.parser")
         else :
-            msg = f"The status_code is {response.status_code}, check the URL"
+            msg = f"The status_code is {response.status_code}, check the URL : {access_url}"
             raise ValueError(msg)
         for access_string in access_page.stripped_strings :
             match_string = re.search(r"Résultats des tests.*",access_string, \
@@ -342,12 +340,12 @@ class FLBT05(AbstractChecker) :
                                         break
                                 compliance_tmp = statement_str[index - counter:index + 1].split(" ")
                                 compliance = functools.reduce(lambda x, y : x + y, compliance_tmp)
-                                return {self.name : compliance}
+                                return compliance
                             except ValueError:
                                 continue
                 access_tag = access_tag.parent
                 iter_limit -= 1
-        return {self.name : False}
+        return False
 
 
 class FLBT06(AbstractChecker) : #Enlever footer
@@ -402,7 +400,7 @@ class FLBT06(AbstractChecker) : #Enlever footer
             legal_url =  home_url + tmp_url
         return legal_url
 
-    def execute(self, web_page : bs4.BeautifulSoup, url : str) -> dict :
+    def execute(self, web_page : bs4.BeautifulSoup, url : str):
         """
         This method performs the test on the beautifulsoup object passed in parameter and determines
         if there is a "Mentions légales" link on the web page, and if yes, it retrieves the complete
@@ -432,13 +430,13 @@ class FLBT06(AbstractChecker) : #Enlever footer
                 while legal_tag.name != "a" :
                     legal_tag = legal_tag.parent
                     if legal_tag.name == "html" :
-                        return {self.name : False}
+                        return False
                 try :
                     tmp_url = legal_tag.attrs["href"]
                 except KeyError :
-                    return {self.name : False}
-                return {self.name : self.get_legal_url(tmp_url, url)}
-        return {self.name : False}
+                    return False
+                return self.get_legal_url(tmp_url, url)
+        return False
 
 
 class FLBT07(AbstractChecker) :
@@ -466,7 +464,7 @@ class FLBT07(AbstractChecker) :
         """
         super().__init__("FLBT07")
 
-    def execute(self, web_page : bs4.BeautifulSoup, url : str) -> dict :  # noqa: ARG002
+    def execute(self, web_page : bs4.BeautifulSoup, url : str):  # noqa: ARG002
         """
         This method performs the test on the beautifulsoup object passed in parameter and determines
         if the language is specified in the header of the HTML page. If yes, it returns a string
@@ -486,6 +484,6 @@ class FLBT07(AbstractChecker) :
             specified in the header of the HTML page, or it returns the language (str)
         """
         try :
-            return {self.name : web_page.html.attrs["lang"]}
+            return web_page.html.attrs["lang"]
         except KeyError :
-            return {self.name : False}
+            return False
