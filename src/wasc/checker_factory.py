@@ -16,7 +16,7 @@ Objects
 -------
 checker_factory
 """
-import waccess.flb_checkers as flb
+import wasc.flb_checkers as flb
 
 
 class CheckerFactory :

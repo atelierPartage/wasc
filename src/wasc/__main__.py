@@ -4,6 +4,6 @@
 import sys
 
 if __name__ == "__main__":
-    from waccess.cli import waccess
+    from wasc.cli import wasc
 
-    sys.exit(waccess())
+    sys.exit(wasc())

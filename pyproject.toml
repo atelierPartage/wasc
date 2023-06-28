@@ -3,9 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "waccess"
+name = "wasc"
 dynamic = ["version"]
-description = 'waccess, for Websites Accessibility Criteria Checker, helps to evaluate accessibility criteria on a list of websites'
+description = 'wasc, for Web Accessibility Simple Checker, helps to evaluate accessibility criteria on a list of websites'
 readme = "README.md"
 requires-python = ">=3.7"
 license = "CECILL-2.1"
@@ -36,15 +36,15 @@ dependencies = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/unknown/waccess#readme"
-Issues = "https://github.com/unknown/waccess/issues"
-Source = "https://github.com/unknown/waccess"
+Documentation = "git@github.com:gcollet/wasc#readme"
+Issues = "git@github.com:gcollet/wasc/issues"
+Source = "git@github.com:gcollet/wasc"
 
 [project.scripts]
-waccess = "waccess.cli:waccess"
+wasc = "wasc.cli:wasc"
 
 [tool.hatch.version]
-path = "src/waccess/__about__.py"
+path = "src/wasc/__about__.py"
 
 [tool.hatch.envs.default]
 dependencies = [
@@ -53,10 +53,10 @@ dependencies = [
 ]
 
 [tool.hatch.envs.default.env-vars]
-WACCESS_CRITERIA_DEFAULT_PATH = "./data/default_criteria.yml"
+WASC_CRITERIA_DEFAULT_PATH = "./data/default_criteria.yml"
 
 [tool.hatch.envs.build.env-vars]
-WACCESS_CRITERIA_DEFAULT_PATH = "./data/default_criteria.yml"
+WACS_CRITERIA_DEFAULT_PATH = "./data/default_criteria.yml"
 
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
@@ -82,7 +82,7 @@ dependencies = [
 ]
 
 [tool.hatch.envs.lint.scripts]
-typing = "mypy --install-types --non-interactive {args:src/waccess tests}"
+typing = "mypy --install-types --non-interactive {args:src/wasc tests}"
 style = [
   "ruff {args:.}",
   "black --check --diff {args:.}",
@@ -148,7 +148,7 @@ unfixable = [
 ]
 
 [tool.ruff.isort]
-known-first-party = ["waccess"]
+known-first-party = ["wasc"]
 
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"
@@ -158,16 +158,16 @@ ban-relative-imports = "all"
 "tests/**/*" = ["PLR2004", "S101", "TID252"]
 
 [tool.coverage.run]
-source_pkgs = ["waccess", "tests"]
+source_pkgs = ["wasc", "tests"]
 branch = true
 parallel = true
 omit = [
-  "src/waccess/__about__.py",
+  "src/wasc/__about__.py",
 ]
 
 [tool.coverage.paths]
-waccess = ["src/waccess", "*/waccess/src/waccess"]
-tests = ["tests", "*/waccess/tests"]
+wasc = ["src/wasc", "*/wasc/src/wasc"]
+tests = ["tests", "*/wasc/tests"]
 
 [tool.coverage.report]
 exclude_lines = [

@@ -31,7 +31,7 @@ import re
 import bs4
 import requests
 
-from waccess.checker import AbstractChecker
+from wasc.abstract_checker import AbstractChecker
 
 HEADER = {
     "user-agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 \
@@ -39,21 +39,23 @@ HEADER = {
     "referer" : "https://www.google.com/"
     }
 
-ACCESSIBILITY_PATTERN = re.compile("Accessibilité[ \xa0]: (.*) conforme", re.IGNORECASE)
+ACCESSIBILITY_PATTERN = re.compile("Accessibilité[ \xa0]:[ \xa0](non|partiellement|totalement)[ \xa0]conforme", re.IGNORECASE)
 
 class FLBT01(AbstractChecker) :
     """FLBT01
-    A class to represent the test of presence of the head tag of a web page. This class inherits
-    from the AbstrastChecker class.
+    A class to test the presence of <head> tags.
+    This class inherits from the AbstrastChecker.
 
     Attributes
     ----------
     name : str
-        The name of the checker
+        The name of the checker, i.e. a small identifier used in config files
+    description : str
+        The description of the checker, used in output
 
     Methods
     -------
-    execute(self, web_page, url) :
+    execute(self, web_page, url) -> dict :
         return the result of the checker
     """
     def __init__(self) :
@@ -64,31 +66,30 @@ class FLBT01(AbstractChecker) :
         ----------
         None
         """
-        super().__init__("FLBT01")
+        super().__init__("FLBT01", "Nombre de <head>")
 
     def execute(self, web_page : bs4.BeautifulSoup, url : str):  # noqa: ARG002
         """
-        This method performs the test on the beautifulsoup object passed in parameter and returns
-        the number of head tags of the web page
+        Gets the number of <head> tags in the web page
 
         Parameters
         ----------
         web_page : bs4.BeautifulSoup
             The BeautifulSoup object created from url
         url : str
-            The URL of the analyzed web page
+            The URL of the analyzed web page (NOT USED HERE)
 
         Returns
         -------
-        dict :
-            The name of the checker is the key and the number of head tags is the value
+         : int
+            The number of <head> tags
         """
-        return len(web_page.find_all("head"))
+        return len(web_page.find_all(name="head"))
 
 class FLBT02(AbstractChecker) :
     """FLBT02
-    A class to represent the test of the depth of the head tag(s) of a web page. This class
-    inherits from the AbstrastChecker class.
+    A class to get the depth of <head> tags in a web page.
+    This class inherits from the AbstrastChecker.
 
     Attributes
     ----------
@@ -108,12 +109,11 @@ class FLBT02(AbstractChecker) :
         ----------
         None
         """
-        super().__init__("FLBT02")
+        super().__init__("FLBT02", "Profondeur des <head>")
 
-    def execute(self, web_page : bs4.BeautifulSoup, url : str):
+    def execute(self, web_page : bs4.BeautifulSoup, url : str):  # noqa: ARG002
         """
-        This method performs the test on the beautifulsoup object passed in parameter and returns
-        the depth of head tag(s) of the web page
+        Returns the depth of <head> tags of the web page
 
         Parameters
         ----------
@@ -124,18 +124,11 @@ class FLBT02(AbstractChecker) :
 
         Returns
         -------
-        dict :
-            The name of the checker is the key and the value is the list of depth of head tags
+         : list
+            The list of depth of head tags
         """
-        checker_01 = FLBT01()
-        head_tag = checker_01.execute(web_page, url)
-        if not head_tag :
-            return False
-        result = []
-        for tag in web_page.find_all("head", limit = head_tag) :
-            depth = len(list(tag.parents)) - 1
-            result.append(depth)
-        return result
+        head_tag = web_page.find_all("head")
+        return [len(list(tag.parents)) - 1 for tag in head_tag] if head_tag else []
 
 class FLBT03(AbstractChecker) : #Mettre à jour docstrings
     """FLBT03
@@ -160,7 +153,7 @@ class FLBT03(AbstractChecker) : #Mettre à jour docstrings
         ----------
         None
         """
-        super().__init__("FLBT03")
+        super().__init__("FLBT03", "Accessibilité")
 
     def execute(self, web_page : bs4.BeautifulSoup, url : str):  # noqa: ARG002
         """
@@ -183,7 +176,8 @@ class FLBT03(AbstractChecker) : #Mettre à jour docstrings
             "Accessibilité" or "Accessibility", 2, 3, 4 if there is the level of accessibility,
             "Totalement", "Partiellement", "non", ect
         """
-        mention =  web_page.find(string = ACCESSIBILITY_PATTERN)
+        mention = web_page.find_all(string = ACCESSIBILITY_PATTERN)
+        # if isinstance(mention, str) :
         return mention if mention else False
 
 class FLBT04(AbstractChecker) :
@@ -209,7 +203,7 @@ class FLBT04(AbstractChecker) :
         ----------
         None
         """
-        super().__init__("FLBT04")
+        super().__init__("FLBT04", "Lien accessibilité")
 
     def get_access_url(self, tmp_url : str, url : str) -> str :
         """
@@ -252,7 +246,7 @@ class FLBT04(AbstractChecker) :
             The name of the checker is the key and the value is either False if the mention
             "Accessibilité" / "Accessibility" is not a link, or it returns the URL of the link (str)
         """
-        access_tag =  web_page.find(string = ACCESSIBILITY_PATTERN)
+        access_tag = web_page.find(string = ACCESSIBILITY_PATTERN)
         if access_tag :
             while access_tag and access_tag.name != "a" and access_tag.name != "html":
                 access_tag = access_tag.parent
@@ -286,7 +280,7 @@ class FLBT05(AbstractChecker) :
         ----------
         None
         """
-        super().__init__("FLBT05")
+        super().__init__("FLBT05", "Taux d'accessibilité")
 
     def execute(self, web_page : bs4.BeautifulSoup, url : str):
         """
@@ -371,7 +365,7 @@ class FLBT06(AbstractChecker) : #Enlever footer
         ----------
         None
         """
-        super().__init__("FLBT06")
+        super().__init__("FLBT06", "Mentions légales")
 
     def get_legal_url(self, tmp_url : str, url : str) -> str :
         """
@@ -462,7 +456,7 @@ class FLBT07(AbstractChecker) :
         ----------
         None
         """
-        super().__init__("FLBT07")
+        super().__init__("FLBT07", "Langage")
 
     def execute(self, web_page : bs4.BeautifulSoup, url : str):  # noqa: ARG002
         """

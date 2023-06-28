@@ -9,12 +9,8 @@ class
 Audit
 """
 
-import asyncio
-
 import bs4
 import requests
-
-from waccess.criterion import Criterion
 
 
 class Report :
@@ -126,13 +122,14 @@ class Report :
             each URL
         """
         header = {
-            "user-agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 \
-                (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36" ,
+            "user-agent" : "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36" ,
             "referer" : "https://www.google.com/"
             }
         response = requests.get(self.url, headers=header, timeout = 1)
         if response.status_code == requests.codes.ok :
             self.__bs_obj = bs4.BeautifulSoup(response.content, "html.parser")
+        else:
+            return {"bad response" : response.status_code}
         result = {}
         if self.__bs_obj:
             for crit in self.__criteria :

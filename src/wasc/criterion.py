@@ -11,7 +11,7 @@ Class
 -----
 Criterion
 """
-from waccess.checker_factory import checker_factory
+from wasc.checker_factory import checker_factory
 
 
 class Criterion :
@@ -90,4 +90,4 @@ class Criterion :
         bool : True if the beautifulsoup object has at least one head tag, if
         not it returns False
         """
-        return {checker.name : checker.execute(web_page, url) for checker in self.__checkers}
+        return {checker.description : checker.execute(web_page, url) for checker in self.__checkers}

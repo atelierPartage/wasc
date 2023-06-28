@@ -6,9 +6,10 @@ import sys
 
 import click
 
-from waccess.__about__ import __version__
-from waccess.report import Criterion, Report
-from waccess.utils import read_criteria_config, read_websites
+from wasc.__about__ import __version__
+from wasc.criterion import Criterion
+from wasc.report import Report
+from wasc.utils import read_criteria_config, read_websites
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 DEFAULT_CRIT_DICT = { "Balise head" : ["FLBT01", "FLBT02"]}
@@ -23,10 +24,10 @@ DEFAULT_CRIT_DICT = { "Balise head" : ["FLBT01", "FLBT02"]}
 @click.option("-f", "--output_format", default = "json",
               type=click.Choice(["json", "csv"], case_sensitive=False),
               help="Output format [default=json]")
-@click.version_option(version=__version__, prog_name="waccess")
-def waccess(websites, criteria, output, output_format):
+@click.version_option(version=__version__, prog_name="wasc")
+def wasc(websites, criteria, output, output_format):
     """
-    waccess, for Websites Accessibility Criteria Checker,
+    wasc, for Websites Accessibility Criteria Checker,
     helps to evaluate accessibility criteria on a list of websites
 
     WEBSITES is a CSV file containing a list of websites as couples
@@ -42,4 +43,4 @@ def waccess(websites, criteria, output, output_format):
     websites = read_websites(websites)
     click.echo(f"Analysis of {len(websites)} websites...")
     report = {label : Report(label, url, crit_list).execute() for label, url in websites}
-    click.echo(json.dumps(report, sort_keys=True, indent=4), file=output)
+    click.echo(json.dumps(report, sort_keys=True, indent=4, ensure_ascii=False), file=output)

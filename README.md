@@ -1,22 +1,22 @@
-# waccess
+# wasc
 
-[![PyPI - Version](https://img.shields.io/pypi/v/waccess.svg)](https://pypi.org/project/waccess)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/waccess.svg)](https://pypi.org/project/waccess)
+[![PyPI - Version](https://img.shields.io/pypi/v/wasc.svg)](https://pypi.org/project/wasc)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/wasc.svg)](https://pypi.org/project/wasc)
 
 -----
 
 **Table of Contents**
 
-- [waccess](#waccess)
+- [wasc](#wasc)
   - [Installation](#installation)
   - [License](#license)
 
 ## Installation
 
 ```console
-pip install waccess
+pip install wasc
 ```
 
 ## License
 
-`waccess` is distributed under the terms of the [CECILL-2.1](https://spdx.org/licenses/CECILL-2.1.html) license.
+`wasc` is distributed under the terms of the [CECILL-2.1](https://spdx.org/licenses/CECILL-2.1.html) license.
