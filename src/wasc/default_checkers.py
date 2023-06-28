@@ -2,27 +2,27 @@
 #
 # SPDX-License-Identifier: CECILL-2.1
 """
-Module flb_checker
+Module default_checker
 
 Provides custom classes of checkers inherited from AbstractChecker.
 Checkers are used to analyze the content of web pages as Beautiful soup objects.
-Present Checkers were defined with the help of François le Berre (FLB).
+Present Checkers were defined with the help of François le Berre.
 
 Classes
 -------
-FLBT01(AbstractChecker) :
+DFTT01(AbstractChecker) :
     Test the presence of tags <HEAD>
-FLBT02(AbstractChecker) :
+DFTT02(AbstractChecker) :
     Test the depth of tags <HEAD>
-FLBT03(AbstractChecker) :
+DFTT03(AbstractChecker) :
     Test the presence of the word "Accessibilité"
-FLBT04(AbstractChecker) :
+DFTT04(AbstractChecker) :
     Test if the word "Accessibilité" found in the page is a link (href)
-FLBT05(AbstractChecker) :
+DFTT05(AbstractChecker) :
     Test the presence of a compliance rate (%) on the accessibility statement
-FLBT06(AbstractChecker) :
+DFTT06(AbstractChecker) :
     Test the presence of "mention légales" link on the web page
-FLBT07(AbstractChecker) :
+DFTT07(AbstractChecker) :
     Test the presence of the language in the header of the HTML page
 """
 import functools
@@ -41,8 +41,8 @@ HEADER = {
 
 ACCESSIBILITY_PATTERN = re.compile("Accessibilité[ \xa0]:[ \xa0](non|partiellement|totalement)[ \xa0]conforme", re.IGNORECASE)
 
-class FLBT01(AbstractChecker) :
-    """FLBT01
+class DFTT01(AbstractChecker) :
+    """DFTT01
     A class to test the presence of <head> tags.
     This class inherits from the AbstrastChecker.
 
@@ -60,13 +60,13 @@ class FLBT01(AbstractChecker) :
     """
     def __init__(self) :
         """
-        It constructs all the necessary attributes for the FLBT01 class
+        It constructs all the necessary attributes for the DFTT01 class
 
         Parameters
         ----------
         None
         """
-        super().__init__("FLBT01", "Nombre de <head>")
+        super().__init__("DFTT01", "Nombre de <head>")
 
     def execute(self, web_page : bs4.BeautifulSoup, url : str):  # noqa: ARG002
         """
@@ -86,8 +86,8 @@ class FLBT01(AbstractChecker) :
         """
         return len(web_page.find_all(name="head"))
 
-class FLBT02(AbstractChecker) :
-    """FLBT02
+class DFTT02(AbstractChecker) :
+    """DFTT02
     A class to get the depth of <head> tags in a web page.
     This class inherits from the AbstrastChecker.
 
@@ -103,13 +103,13 @@ class FLBT02(AbstractChecker) :
     """
     def __init__(self) :
         """
-        It constructs all the necessary attributes for the FLBT02 class
+        It constructs all the necessary attributes for the DFTT02 class
 
         Parameters
         ----------
         None
         """
-        super().__init__("FLBT02", "Profondeur des <head>")
+        super().__init__("DFTT02", "Profondeur des <head>")
 
     def execute(self, web_page : bs4.BeautifulSoup, url : str):  # noqa: ARG002
         """
@@ -130,8 +130,8 @@ class FLBT02(AbstractChecker) :
         head_tag = web_page.find_all("head")
         return [len(list(tag.parents)) - 1 for tag in head_tag] if head_tag else []
 
-class FLBT03(AbstractChecker) : #Mettre à jour docstrings
-    """FLBT03
+class DFTT03(AbstractChecker) : #Mettre à jour docstrings
+    """DFTT03
     A class to represent the test of presence of the mention "Accessibilité" or "Accessibility" on
     the web page. This class inherits from the AbstrastChecker class.
 
@@ -147,13 +147,13 @@ class FLBT03(AbstractChecker) : #Mettre à jour docstrings
     """
     def __init__(self) :
         """
-        It constructs all the necessary attributes for the FLBT03 class
+        It constructs all the necessary attributes for the DFTT03 class
 
         Parameters
         ----------
         None
         """
-        super().__init__("FLBT03", "Accessibilité")
+        super().__init__("DFTT03", "Accessibilité")
 
     def execute(self, web_page : bs4.BeautifulSoup, url : str):  # noqa: ARG002
         """
@@ -180,8 +180,8 @@ class FLBT03(AbstractChecker) : #Mettre à jour docstrings
         # if isinstance(mention, str) :
         return mention if mention else False
 
-class FLBT04(AbstractChecker) :
-    """FLBT04
+class DFTT04(AbstractChecker) :
+    """DFTT04
     A class to test if the mention of "Accessibilité" present on the web page is a link. This class
     inherits from the AbstrastChecker class.
 
@@ -197,13 +197,13 @@ class FLBT04(AbstractChecker) :
     """
     def __init__(self) :
         """
-        It constructs all the necessary attributes for the FLBT04 class
+        It constructs all the necessary attributes for the DFTT04 class
 
         Parameters
         ----------
         None
         """
-        super().__init__("FLBT04", "Lien accessibilité")
+        super().__init__("DFTT04", "Lien accessibilité")
 
     def get_access_url(self, tmp_url : str, url : str) -> str :
         """
@@ -257,8 +257,8 @@ class FLBT04(AbstractChecker) :
             return self.get_access_url(tmp_url, url)
         return False
 
-class FLBT05(AbstractChecker) :
-    """FLBT05
+class DFTT05(AbstractChecker) :
+    """DFTT05
     A class to represent the test of presence of compliance rate (%) on the accessibility statement
     web page. This class inherits from the AbstrastChecker class.
 
@@ -274,13 +274,13 @@ class FLBT05(AbstractChecker) :
     """
     def __init__(self) :
         """
-        It constructs all the necessary attributes for the FLBT05 class
+        It constructs all the necessary attributes for the DFTT05 class
 
         Parameters
         ----------
         None
         """
-        super().__init__("FLBT05", "Taux d'accessibilité")
+        super().__init__("DFTT05", "Taux d'accessibilité")
 
     def execute(self, web_page : bs4.BeautifulSoup, url : str):
         """
@@ -300,7 +300,7 @@ class FLBT05(AbstractChecker) :
             The name of the checker is the key and the value is either False if there is no
             compliance rate (%), or the compliance rate (%)
         """
-        checker_04 = FLBT04()
+        checker_04 = DFTT04()
         access_url = checker_04.execute(web_page, url)
         if not access_url :
             return False
@@ -342,8 +342,8 @@ class FLBT05(AbstractChecker) :
         return False
 
 
-class FLBT06(AbstractChecker) : #Enlever footer
-    """FLBT06
+class DFTT06(AbstractChecker) : #Enlever footer
+    """DFTT06
     A class to represent the test of presence of "Mentions légales" link on the web page. This class
     inherits from the AbstrastChecker class.
 
@@ -359,13 +359,13 @@ class FLBT06(AbstractChecker) : #Enlever footer
     """
     def __init__(self) :
         """
-        It constructs all the necessary attributes for the FLBT06 class
+        It constructs all the necessary attributes for the DFTT06 class
 
         Parameters
         ----------
         None
         """
-        super().__init__("FLBT06", "Mentions légales")
+        super().__init__("DFTT06", "Mentions légales")
 
     def get_legal_url(self, tmp_url : str, url : str) -> str :
         """
@@ -433,8 +433,8 @@ class FLBT06(AbstractChecker) : #Enlever footer
         return False
 
 
-class FLBT07(AbstractChecker) :
-    """FLBT07
+class DFTT07(AbstractChecker) :
+    """DFTT07
     A class to represent the test of presence of the language in the header of the HTML page. This
     class inherits from the AbstrastChecker class.
 
@@ -450,13 +450,13 @@ class FLBT07(AbstractChecker) :
     """
     def __init__(self) :
         """
-        It constructs all the necessary attributes for the FLBT07 class
+        It constructs all the necessary attributes for the DFTT07 class
 
         Parameters
         ----------
         None
         """
-        super().__init__("FLBT07", "Langage")
+        super().__init__("DFTT07", "Langage")
 
     def execute(self, web_page : bs4.BeautifulSoup, url : str):  # noqa: ARG002
         """

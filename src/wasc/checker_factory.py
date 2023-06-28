@@ -16,7 +16,7 @@ Objects
 -------
 checker_factory
 """
-import wasc.flb_checkers as flb
+import wasc.default_checkers as dft
 
 
 class CheckerFactory :
@@ -78,10 +78,10 @@ class CheckerFactory :
         return self.__checker_dict[checker_name]()
 
 checker_factory = CheckerFactory()
-checker_factory.register("FLBT01", flb.FLBT01)
-checker_factory.register("FLBT02", flb.FLBT02)
-checker_factory.register("FLBT03", flb.FLBT03)
-checker_factory.register("FLBT04", flb.FLBT04)
-checker_factory.register("FLBT05", flb.FLBT05)
-checker_factory.register("FLBT06", flb.FLBT06)
-checker_factory.register("FLBT07", flb.FLBT07)
+checker_factory.register("FLBT01", dft.FLBT01)
+checker_factory.register("FLBT02", dft.FLBT02)
+checker_factory.register("FLBT03", dft.FLBT03)
+checker_factory.register("FLBT04", dft.FLBT04)
+checker_factory.register("FLBT05", dft.FLBT05)
+checker_factory.register("FLBT06", dft.FLBT06)
+checker_factory.register("FLBT07", dft.FLBT07)
