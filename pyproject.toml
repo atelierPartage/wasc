@@ -36,9 +36,9 @@ dependencies = [
 ]
 
 [project.urls]
-Documentation = "git@github.com:gcollet/wasc#readme"
-Issues = "git@github.com:gcollet/wasc/issues"
-Source = "git@github.com:gcollet/wasc"
+Documentation = "https://github.com/gcollet/wasc#readme"
+Issues = "https://github.com/gcollet/wasc/issues"
+Source = "https://github.com/gcollet/wasc"
 
 [project.scripts]
 wasc = "wasc.cli:wasc"
