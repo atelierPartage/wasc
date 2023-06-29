@@ -11,8 +11,8 @@ import yaml
 
 def read_criteria_config(filename) :
     """
-    Reads the list of criteria. Each criterion is associated qith a list of checkers
-
+    Reads the list of criteria.
+    Each criterion is associated with a list of checkers
     The file must be in YAML format.
 
     Parameters
@@ -40,7 +40,7 @@ def read_websites(filename) :
     Returns
     -------
      : dict
-        A dictionary of websites (keys are labels and values URLs)
+        A list of of (websites, url)
     """
     with open(filename, encoding = "utf-8") as url_file :
         return [(line[0].strip(), line[1].strip()) for line in csv.reader(url_file)]
