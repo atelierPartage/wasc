@@ -12,10 +12,10 @@ from wasc.report import Report
 from wasc.utils import read_criteria_config, read_websites
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
-DEFAULT_CRIT_DICT = { "Balise head" : ["FLBT01", "FLBT02"]}
+DEFAULT_CRIT_DICT = { "Balise head" : ["DFTT01", "DFTT02"]}
 
 @click.command(context_settings=CONTEXT_SETTINGS)
-@click.argument("websites", type=click.File("r"))
+@click.argument("websites", type=click.Path(exists=True))
 @click.option("-c", "--criteria", type=click.Path(exists=True),
               help="Criteria configuration file (yaml)")
 @click.option("-o", "--output", default=sys.stdout,
