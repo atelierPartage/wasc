@@ -22,8 +22,10 @@ DFTT05(AbstractChecker) :
     Test the presence of a compliance rate (%) on the accessibility statement
 DFTT06(AbstractChecker) :
     Test the presence of "mention légales" link on the web page
-DFTT07(AbstractChecker) :
+LangChecker(AbstractChecker) :
     Test the presence of the language in the header of the HTML page
+DoctypeChecker(AbstractChecker) :
+    Test the presence of Doctype in the web page
 """
 import functools
 import re
@@ -32,6 +34,8 @@ import bs4
 import requests
 
 from wasc.abstract_checker import AbstractChecker
+
+NON_CONFORME = "non conforme"
 
 HEADER = {
     "user-agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 \
@@ -426,15 +430,16 @@ class DFTT06(AbstractChecker) : #Enlever footer
         return False
 
 
-class DFTT07(AbstractChecker) :
-    """DFTT07
-    A class to represent the test of presence of the language in the header of the HTML page. This
-    class inherits from the AbstrastChecker class.
+class LangChecker(AbstractChecker) :
+    """LangChecker
+    Check the presence of attribute lang in the html tag of the website
 
     Attributes
     ----------
     name : str
         The name of the checker
+    description : str
+        Description of the checker
 
     Methods
     -------
@@ -443,19 +448,18 @@ class DFTT07(AbstractChecker) :
     """
     def __init__(self) :
         """
-        It constructs all the necessary attributes for the DFTT07 class
+        It constructs all the necessary attributes for the LangChecker class
 
         Parameters
         ----------
         None
         """
-        super().__init__("DFTT07", "Langage")
+        super().__init__("LangChecker", "Lang")
 
     def execute(self, web_page : bs4.BeautifulSoup, url : str):  # noqa: ARG002
         """
-        This method performs the test on the beautifulsoup object passed in parameter and determines
-        if the language is specified in the header of the HTML page. If yes, it returns a string
-        corresponding to the language of the web page
+        If the language is specified in the html tag, returns a string
+        corresponding to the language of the web page, else "non conforme"
 
         Parameters
         ----------
@@ -466,14 +470,13 @@ class DFTT07(AbstractChecker) :
 
         Returns
         -------
-        dict :
-            The name of the checker is the key and the value is either False if there is no language
-            specified in the header of the HTML page, or it returns the language (str)
+        str :
+            the string of language or "non conforme"
         """
         try :
             return web_page.html.attrs["lang"]
         except KeyError :
-            return False
+            return NON_CONFORME
 
 class DoctypeChecker(AbstractChecker) :
     """DoctypeChecker
@@ -527,8 +530,10 @@ class DoctypeChecker(AbstractChecker) :
                 doctype_pos = current_pos
                 doctype_found = True
                 if item != "html":
-                    return False
+                    return NON_CONFORME
             elif isinstance(item, bs4.Tag) and item.name == "html":
                 html_pos = current_pos
             current_pos += 1
-        return doctype_found and doctype_pos < html_pos
+        if doctype_found and doctype_pos < html_pos:
+            return "html"
+        return NON_CONFORME
