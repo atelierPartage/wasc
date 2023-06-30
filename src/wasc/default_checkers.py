@@ -59,13 +59,6 @@ class DFTT01(AbstractChecker) :
         return the result of the checker
     """
     def __init__(self) :
-        """
-        It constructs all the necessary attributes for the DFTT01 class
-
-        Parameters
-        ----------
-        None
-        """
         super().__init__("DFTT01", "Nombre de <head>")
 
     def execute(self, web_page : bs4.BeautifulSoup, url : str):  # noqa: ARG002
@@ -481,3 +474,61 @@ class DFTT07(AbstractChecker) :
             return web_page.html.attrs["lang"]
         except KeyError :
             return False
+
+class DoctypeChecker(AbstractChecker) :
+    """DoctypeChecker
+    Check the presence of DOCTYPE at the beginning of HTML document
+    (before <html>) + the type is html
+
+    Attributes
+    ----------
+    name : str
+        The name of the checker
+    description : str
+        Description of the checker
+
+    Methods
+    -------
+    execute(self, web_page, url) :
+        return the result of the checker
+    """
+    def __init__(self) :
+        """
+        Sets the name and description of DoctypeChecker
+
+        Parameters
+        ----------
+        None
+        """
+        super().__init__("DoctypeChecker", "Doctype")
+
+    def execute(self, web_page : bs4.BeautifulSoup, url : str):  # noqa: ARG002
+        """
+        Check the presence of doctype in html document
+
+        Parameters
+        ----------
+        web_page : bs4.BeautifulSoup
+            The BeautifulSoup object created url
+        url : str
+            The URL of the analyzed web page
+
+        Returns
+        -------
+        bool :
+            True if Doctype is present, before <html> and has "html" value
+        """
+        current_pos = 0
+        doctype_pos = 1
+        html_pos = 0
+        doctype_found = False
+        for item in web_page.contents:
+            if isinstance(item, bs4.Doctype):
+                doctype_pos = current_pos
+                doctype_found = True
+                if item != "html":
+                    return False
+            elif isinstance(item, bs4.Tag) and item.name == "html":
+                html_pos = current_pos
+            current_pos += 1
+        return doctype_found and doctype_pos < html_pos
