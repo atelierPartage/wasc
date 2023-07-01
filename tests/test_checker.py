@@ -83,3 +83,43 @@ class TestAccessChecker:
         access_checker = dft.AccessChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
         assert access_checker.execute(basic_webpage, "") == "totalement conforme"
+
+class TestAccessLinkChecker:
+    def test_access_link_checker_init(self):
+        access_link_checker = dft.AccessLinkChecker()
+        assert access_link_checker.name == "AccessLinkChecker"
+        assert access_link_checker.description == "Lien accessibilité"
+
+    def test_access_checker_valid_mention(self):
+        test_link = '<a href="/misc/accessibilite/">Accessibilité : totalement conforme</a>'
+        test_html = "<!DOCTYPE html><html><body><div>" + test_link + "</div></body></html>"
+        access_link_checker = dft.AccessLinkChecker()
+        basic_webpage = BeautifulSoup(test_html, BS_PARSER)
+        assert access_link_checker.execute(basic_webpage, "https://www.example.com") == "https://www.example.com/misc/accessibilite"
+
+    def test_access_checker_fail_mention(self):
+        test_html = "<!DOCTYPE html><html><body><div>Accessibilité : totalement conforme</div></body></html>"
+        access_link_checker = dft.AccessLinkChecker()
+        basic_webpage = BeautifulSoup(test_html, BS_PARSER)
+        assert access_link_checker.execute(basic_webpage, "https://www.example.com") == FAIL
+
+    def test_access_checker_valid_other(self):
+        test_link = '<a href="/accessibilite/">Accessibilité</a>'
+        test_html = "<!DOCTYPE html><html><body><footer>" + test_link + "</footer></body></html>"
+        access_link_checker = dft.AccessLinkChecker()
+        basic_webpage = BeautifulSoup(test_html, BS_PARSER)
+        assert access_link_checker.execute(basic_webpage, "https://www.example.com") == "https://www.example.com/accessibilite"
+
+    def test_access_checker_fail_other(self):
+        test_link = '<a href="/misc/accessibilite/">Accessibilité</a>'
+        test_html = "<!DOCTYPE html><html><body><footer>" + test_link + "</footer></body></html>"
+        access_link_checker = dft.AccessLinkChecker()
+        basic_webpage = BeautifulSoup(test_html, BS_PARSER)
+        assert access_link_checker.execute(basic_webpage, "https://www.example.com") == FAIL
+    
+    def test_access_checker_fail_href(self):
+        test_link = "<a>Accessibilité</a>"
+        test_html = "<!DOCTYPE html><html><body><footer>" + test_link + "</footer></body></html>"
+        access_link_checker = dft.AccessLinkChecker()
+        basic_webpage = BeautifulSoup(test_html, BS_PARSER)
+        assert access_link_checker.execute(basic_webpage, "https://www.example.com") == FAIL

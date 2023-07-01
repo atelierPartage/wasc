@@ -14,10 +14,6 @@ DFTT01(AbstractChecker) :
     Test the presence of tags <HEAD>
 DFTT02(AbstractChecker) :
     Test the depth of tags <HEAD>
-DFTT03(AbstractChecker) :
-    Test the presence of the word "Accessibilité"
-DFTT04(AbstractChecker) :
-    Test if the word "Accessibilité" found in the page is a link (href)
 DFTT05(AbstractChecker) :
     Test the presence of a compliance rate (%) on the accessibility statement
 DFTT06(AbstractChecker) :
@@ -26,6 +22,10 @@ LangChecker(AbstractChecker) :
     Test the presence of the language in the header of the HTML page
 DoctypeChecker(AbstractChecker) :
     Test the presence of Doctype in the web page
+AccessChecker(AbstractChecker) :
+    Test the presence of "Accessibilité" in the page
+AccessLinkChecker(AbstractChecker) :
+    Test if a link exist to the accessibility page
 """
 import functools
 import re
@@ -34,6 +34,7 @@ import bs4
 import requests
 
 from wasc.abstract_checker import AbstractChecker
+from wasc.utils import check_and_correct_url
 
 FAIL = "échec"
 
@@ -65,7 +66,7 @@ class DFTT01(AbstractChecker) :
     def __init__(self) :
         super().__init__("DFTT01", "Nombre de <head>")
 
-    def execute(self, web_page : bs4.BeautifulSoup, url : str):  # noqa: ARG002
+    def execute(self, web_page : bs4.BeautifulSoup, root_url : str):  # noqa: ARG002
         """
         Gets the number of <head> tags in the web page
 
@@ -73,8 +74,8 @@ class DFTT01(AbstractChecker) :
         ----------
         web_page : bs4.BeautifulSoup
             The BeautifulSoup object created from url
-        url : str
-            The URL of the analyzed web page (NOT USED HERE)
+        root_url : str
+            The root URL of the analyzed web page (NOT USED HERE)
 
         Returns
         -------
@@ -108,7 +109,7 @@ class DFTT02(AbstractChecker) :
         """
         super().__init__("DFTT02", "Profondeur des <head>")
 
-    def execute(self, web_page : bs4.BeautifulSoup, url : str):  # noqa: ARG002
+    def execute(self, web_page : bs4.BeautifulSoup, root_url : str):  # noqa: ARG002
         """
         Returns the depth of <head> tags of the web page
 
@@ -116,8 +117,8 @@ class DFTT02(AbstractChecker) :
         ----------
         web_page : bs4.BeautifulSoup
             The BeautifulSoup object created from url
-        url : str
-            The URL of the analyzed web page
+        root_url : str
+            The root URL of the analyzed web page
 
         Returns
         -------
@@ -126,83 +127,6 @@ class DFTT02(AbstractChecker) :
         """
         head_tag = web_page.find_all("head")
         return [len(list(tag.parents)) - 1 for tag in head_tag] if head_tag else []
-
-class DFTT04(AbstractChecker) :
-    """DFTT04
-    A class to test if the mention of "Accessibilité" present on the web page is a link. This class
-    inherits from the AbstrastChecker class.
-
-    Attributes
-    ----------
-    name : str
-        The name of the checker
-
-    Methods
-    -------
-    execute(self, web_page, url) :
-        return the result of the checker
-    """
-    def __init__(self) :
-        """
-        It constructs all the necessary attributes for the DFTT04 class
-
-        Parameters
-        ----------
-        None
-        """
-        super().__init__("DFTT04", "Lien accessibilité")
-
-    def get_access_url(self, tmp_url : str, url : str) -> str :
-        """
-        This method allows to retrieve the URL of the accessibility statement.
-        home_url : the url of the home page
-
-        Parameters
-        ----------
-        tmp_url : str
-            The URL of the mention "Accessibilité" / "Accessibility" link
-        url : str
-            The URL of the analyzed web page
-
-        Returns
-        -------
-        access_url : str
-            The URL of the accessibility statement
-        """
-        if tmp_url.startswith("http") :
-            return tmp_url
-        if url.endswith("/fr") and tmp_url.startswith("/fr") :
-            return url + tmp_url[3:]
-        return url + tmp_url
-
-    def execute(self, web_page : bs4.BeautifulSoup, url : str):
-        """
-        This method performs the test on the beautifulsoup object passed in parameter and determines
-        if the mention "Accessibilité" / "Accessibility" is a link or not
-
-        Parameters
-        ----------
-        web_page : bs4.BeautifulSoup
-            The BeautifulSoup object created from url
-        url : str
-            The URL of the analyzed web page
-
-        Returns
-        -------
-        dict :
-            The name of the checker is the key and the value is either False if the mention
-            "Accessibilité" / "Accessibility" is not a link, or it returns the URL of the link (str)
-        """
-        access_tag = web_page.find(string = ACCESS_PATTERN)
-        if access_tag :
-            while access_tag and access_tag.name != "a" and access_tag.name != "html":
-                access_tag = access_tag.parent
-            try :
-                tmp_url = access_tag.attrs["href"]
-            except KeyError :
-                return False
-            return self.get_access_url(tmp_url, url)
-        return False
 
 class DFTT05(AbstractChecker) :
     """DFTT05
@@ -229,7 +153,7 @@ class DFTT05(AbstractChecker) :
         """
         super().__init__("DFTT05", "Taux d'accessibilité")
 
-    def execute(self, web_page : bs4.BeautifulSoup, url : str):
+    def execute(self, web_page : bs4.BeautifulSoup, root_url : str):
         """
         This method performs the test on the beautifulsoup object passed in parameter and determines
         if there is a compliance rate (%) on the accessibility statement web page or not
@@ -238,8 +162,8 @@ class DFTT05(AbstractChecker) :
         ----------
         web_page : bs4.BeautifulSoup
             The BeautifulSoup object created from url
-        url : str
-            The URL of the analyzed web page
+        root_url : str
+            The root URL of the analyzed web page
 
         Returns
         -------
@@ -247,8 +171,8 @@ class DFTT05(AbstractChecker) :
             The name of the checker is the key and the value is either False if there is no
             compliance rate (%), or the compliance rate (%)
         """
-        checker_04 = DFTT04()
-        access_url = checker_04.execute(web_page, url)
+        checker_04 = AccessLinkChecker()
+        access_url = checker_04.execute(web_page, root_url)
         if not access_url :
             return False
         response = requests.get(access_url, headers=HEADER, timeout = 1)
@@ -314,7 +238,7 @@ class DFTT06(AbstractChecker) : #Enlever footer
         """
         super().__init__("DFTT06", "Mentions légales")
 
-    def get_legal_url(self, tmp_url : str, url : str) -> str :
+    def get_legal_url(self, tmp_url : str, root_url : str) -> str :
         """
         This method allows to retrieve the complete URL of the "Mentions légales" link.
         home_url : the url of the home page
@@ -323,8 +247,8 @@ class DFTT06(AbstractChecker) : #Enlever footer
         ----------
         tmp_url : str
             The URL of "Mention légales" link
-        url : str
-            The URL of the analyzed web page
+        root_url : str
+            The root URL of the analyzed web page
 
         Returns
         -------
@@ -333,15 +257,15 @@ class DFTT06(AbstractChecker) : #Enlever footer
         """
         if tmp_url.startswith("http") :
             legal_url = tmp_url
-        elif url.endswith("/fr") and tmp_url.startswith("/fr") :
-            legal_url = url + tmp_url[3:]
+        elif root_url.endswith("/fr") and tmp_url.startswith("/fr") :
+            legal_url = root_url + tmp_url[3:]
         else :
-            home_url = url.split("/")
+            home_url = root_url.split("/")
             home_url = home_url[0] + "//" + home_url[2]
             legal_url =  home_url + tmp_url
         return legal_url
 
-    def execute(self, web_page : bs4.BeautifulSoup, url : str):
+    def execute(self, web_page : bs4.BeautifulSoup, root_url : str):
         """
         This method performs the test on the beautifulsoup object passed in parameter and determines
         if there is a "Mentions légales" link on the web page, and if yes, it retrieves the complete
@@ -351,8 +275,8 @@ class DFTT06(AbstractChecker) : #Enlever footer
         ----------
         web_page : bs4.BeautifulSoup
             The BeautifulSoup object created from url
-        url : str
-            The URL of the analyzed web page
+        root_url : str
+            The root URL of the analyzed web page
 
         Returns
         -------
@@ -376,7 +300,7 @@ class DFTT06(AbstractChecker) : #Enlever footer
                     tmp_url = legal_tag.attrs["href"]
                 except KeyError :
                     return False
-                return self.get_legal_url(tmp_url, url)
+                return self.get_legal_url(tmp_url, root_url)
         return False
 
 
@@ -398,7 +322,7 @@ class LangChecker(AbstractChecker) :
     """
     def __init__(self) :
         """
-        It constructs all the necessary attributes for the LangChecker class
+        Sets the name and description of LangChecker
 
         Parameters
         ----------
@@ -406,7 +330,7 @@ class LangChecker(AbstractChecker) :
         """
         super().__init__("LangChecker", "Lang")
 
-    def execute(self, web_page : bs4.BeautifulSoup, url : str):  # noqa: ARG002
+    def execute(self, web_page : bs4.BeautifulSoup, root_url : str):  # noqa: ARG002
         """
         If the language is specified in the html tag, returns a string
         corresponding to the language of the web page, else "non conforme"
@@ -415,8 +339,8 @@ class LangChecker(AbstractChecker) :
         ----------
         web_page : bs4.BeautifulSoup
             The BeautifulSoup object created url
-        url : str
-            The URL of the analyzed web page
+        root_url : str
+            The root URL of the analyzed web page
 
         Returns
         -------
@@ -455,7 +379,7 @@ class DoctypeChecker(AbstractChecker) :
         """
         super().__init__("DoctypeChecker", "Doctype")
 
-    def execute(self, web_page : bs4.BeautifulSoup, url : str):  # noqa: ARG002
+    def execute(self, web_page : bs4.BeautifulSoup, root_url : str):  # noqa: ARG002
         """
         Check the presence of doctype in html document
 
@@ -463,8 +387,8 @@ class DoctypeChecker(AbstractChecker) :
         ----------
         web_page : bs4.BeautifulSoup
             The BeautifulSoup object created url
-        url : str
-            The URL of the analyzed web page
+        root_url : str
+            The root URL of the analyzed web page
 
         Returns
         -------
@@ -506,7 +430,7 @@ class AccessChecker(AbstractChecker) :
     """
     def __init__(self) :
         """
-        It constructs all the necessary attributes for the DFTT03 class
+        Sets the name and description of AccessChecker
 
         Parameters
         ----------
@@ -514,7 +438,7 @@ class AccessChecker(AbstractChecker) :
         """
         super().__init__("AccessChecker", "Accessibilité")
 
-    def execute(self, web_page : bs4.BeautifulSoup, url : str):  # noqa: ARG002
+    def execute(self, web_page : bs4.BeautifulSoup, root_url : str):  # noqa: ARG002
         """
         If there is a mention "Accessibilité", returns the level of accessibility,
         else "non conforme"
@@ -523,8 +447,8 @@ class AccessChecker(AbstractChecker) :
         ----------
         web_page : bs4.BeautifulSoup
             The BeautifulSoup object created from url
-        url : str
-            The URL of the analyzed web page
+        root_url : str
+            The root URL of the analyzed web page
 
         Returns
         -------
@@ -534,4 +458,69 @@ class AccessChecker(AbstractChecker) :
         mention = web_page.find_all(string = ACCESS_PATTERN)
         if mention :
             return mention[0].split(":")[1].strip()
+        return FAIL
+
+class AccessLinkChecker(AbstractChecker) :
+    """AccessLinkChecker
+    Check that "Accessibilité" present on the web page is a link.
+
+    Attributes
+    ----------
+    name : str
+        The name of the checker
+    description : str
+        Description of the checker
+
+    Methods
+    -------
+    execute(self, web_page, url) :
+        return the link URL
+    """
+    def __init__(self) :
+        """
+        It constructs all the necessary attributes for the AccessLinkChecker class
+
+        Parameters
+        ----------
+        None
+        """
+        super().__init__("AccessLinkChecker", "Lien accessibilité")
+
+    def execute(self, web_page : bs4.BeautifulSoup, root_url : str):
+        """
+        Search for a link to the accessibility page, either :
+        * if the mention "Accessibilité" is a link
+        * if there exists a link to root_url/accessibilite
+
+        Parameters
+        ----------
+        web_page : bs4.BeautifulSoup
+            The BeautifulSoup object created from url
+        root_url : str
+            The root URL of the analyzed web page
+
+        Returns
+        -------
+        dict :
+            The name of the checker is the key and the value is either False if the mention
+            "Accessibilité" / "Accessibility" is not a link, or it returns the URL of the link (str)
+        """
+        link_url = ""
+        access_tag = web_page.find(string = ACCESS_PATTERN)
+        if access_tag :
+            while access_tag and access_tag.name != "a" and access_tag.name != "html":
+                access_tag = access_tag.parent
+            try :
+                return check_and_correct_url(access_tag.attrs["href"], root_url)
+            except KeyError :
+                pass
+        if not link_url:
+            standard_link = check_and_correct_url("accessibilite", root_url)
+            link_tags = web_page.find_all("a")
+            for tag in link_tags:
+                try :
+                    if check_and_correct_url(tag.attrs["href"], root_url) == standard_link:
+                        return standard_link
+                except KeyError :
+                    pass
         return FAIL
