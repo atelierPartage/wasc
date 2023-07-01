@@ -35,7 +35,7 @@ import requests
 
 from wasc.abstract_checker import AbstractChecker
 
-NON_CONFORME = "non conforme"
+FAIL = "échec"
 
 HEADER = {
     "user-agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 \
@@ -126,56 +126,6 @@ class DFTT02(AbstractChecker) :
         """
         head_tag = web_page.find_all("head")
         return [len(list(tag.parents)) - 1 for tag in head_tag] if head_tag else []
-
-class DFTT03(AbstractChecker) : #Mettre à jour docstrings
-    """DFTT03
-    A class to represent the test of presence of the mention "Accessibilité" or "Accessibility" on
-    the web page. This class inherits from the AbstrastChecker class.
-
-    Attributes
-    ----------
-    name : str
-        The name of the checker
-
-    Methods
-    -------
-    execute(self, web_page, url) :
-        return the result of the checker
-    """
-    def __init__(self) :
-        """
-        It constructs all the necessary attributes for the DFTT03 class
-
-        Parameters
-        ----------
-        None
-        """
-        super().__init__("DFTT03", "Accessibilité")
-
-    def execute(self, web_page : bs4.BeautifulSoup, url : str):  # noqa: ARG002
-        """
-        This method performs the test on the beautifulsoup object passed in parameter and determines
-        if there is no mention "Accessibilité" or "Accessibility", or the level of
-        accessibility if there is the mention
-
-        Parameters
-        ----------
-        web_page : bs4.BeautifulSoup
-            The BeautifulSoup object created from url
-        url : str
-            The URL of the analyzed web page
-
-        Returns
-        -------
-        dict :
-            The name of the checker is the key and the value is either False if there is no mention
-            "Accessibilité" or "Accessibility", or an int (1 if there is only the mention
-            "Accessibilité" or "Accessibility", 2, 3, 4 if there is the level of accessibility,
-            "Totalement", "Partiellement", "non", ect
-        """
-        mention = web_page.find_all(string = ACCESSIBILITY_PATTERN)
-        # if isinstance(mention, str) :
-        return mention if mention else False
 
 class DFTT04(AbstractChecker) :
     """DFTT04
@@ -444,7 +394,7 @@ class LangChecker(AbstractChecker) :
     Methods
     -------
     execute(self, web_page, url) :
-        return the result of the checker
+        return the lang string or "non conforme"
     """
     def __init__(self) :
         """
@@ -476,7 +426,7 @@ class LangChecker(AbstractChecker) :
         try :
             return web_page.html.attrs["lang"]
         except KeyError :
-            return NON_CONFORME
+            return FAIL
 
 class DoctypeChecker(AbstractChecker) :
     """DoctypeChecker
@@ -493,7 +443,7 @@ class DoctypeChecker(AbstractChecker) :
     Methods
     -------
     execute(self, web_page, url) :
-        return the result of the checker
+        return "html" or "non conforme"
     """
     def __init__(self) :
         """
@@ -530,10 +480,58 @@ class DoctypeChecker(AbstractChecker) :
                 doctype_pos = current_pos
                 doctype_found = True
                 if item != "html":
-                    return NON_CONFORME
+                    return FAIL
             elif isinstance(item, bs4.Tag) and item.name == "html":
                 html_pos = current_pos
             current_pos += 1
         if doctype_found and doctype_pos < html_pos:
             return "html"
-        return NON_CONFORME
+        return FAIL
+
+class AccessChecker(AbstractChecker) :
+    """AccessChecker
+    Check the presence of "Accessibilité" mention on the web page.
+
+    Attributes
+    ----------
+    name : str
+        The name of the checker
+    description : str
+        Description of the checker
+
+    Methods
+    -------
+    execute(self, web_page, url) :
+        return the level string or "non conforme"
+    """
+    def __init__(self) :
+        """
+        It constructs all the necessary attributes for the DFTT03 class
+
+        Parameters
+        ----------
+        None
+        """
+        super().__init__("AccessChecker", "Accessibilité")
+
+    def execute(self, web_page : bs4.BeautifulSoup, url : str):  # noqa: ARG002
+        """
+        If there is a mention "Accessibilité", returns the level of accessibility,
+        else "non conforme"
+
+        Parameters
+        ----------
+        web_page : bs4.BeautifulSoup
+            The BeautifulSoup object created from url
+        url : str
+            The URL of the analyzed web page
+
+        Returns
+        -------
+        str :
+            The level of accessibility or "non conforme"
+        """
+        mention = web_page.find_all(string = ACCESSIBILITY_PATTERN)
+        if mention :
+            return mention[0].split(":")[1].strip()
+        return FAIL
