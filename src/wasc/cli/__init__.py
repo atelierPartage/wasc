@@ -12,7 +12,7 @@ from wasc.report import Report
 from wasc.utils import read_criteria_config, read_websites
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
-DEFAULT_CRIT_DICT = { "Accessibilité" : ["AccessChecker", "AccessLinkChecker"]}
+DEFAULT_CRIT_DICT = { "Accessibilité" : ["AccessChecker", "AccessLinkChecker"], "Mentions légales" : ["MentionsLegalesChecker"]}
 
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.argument("websites", type=click.Path(exists=True))
