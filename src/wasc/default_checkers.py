@@ -42,8 +42,8 @@ HEADER = {
         (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36" ,
     "referer" : "https://www.google.com/"
     }
-
-ACCESSIBILITY_PATTERN = re.compile("Accessibilité[ \xa0]:[ \xa0](non|partiellement|totalement)[ \xa0]conforme", re.IGNORECASE)
+mentions = "non|partiellement|totalement"
+ACCESS_PATTERN = re.compile("Accessibilité[ \xa0]:[ \xa0](" + mentions + ")[ \xa0]conforme", re.IGNORECASE)
 
 class DFTT01(AbstractChecker) :
     """DFTT01
@@ -193,7 +193,7 @@ class DFTT04(AbstractChecker) :
             The name of the checker is the key and the value is either False if the mention
             "Accessibilité" / "Accessibility" is not a link, or it returns the URL of the link (str)
         """
-        access_tag = web_page.find(string = ACCESSIBILITY_PATTERN)
+        access_tag = web_page.find(string = ACCESS_PATTERN)
         if access_tag :
             while access_tag and access_tag.name != "a" and access_tag.name != "html":
                 access_tag = access_tag.parent
@@ -531,7 +531,7 @@ class AccessChecker(AbstractChecker) :
         str :
             The level of accessibility or "non conforme"
         """
-        mention = web_page.find_all(string = ACCESSIBILITY_PATTERN)
+        mention = web_page.find_all(string = ACCESS_PATTERN)
         if mention :
             return mention[0].split(":")[1].strip()
         return FAIL

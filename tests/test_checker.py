@@ -1,26 +1,10 @@
 
-import pytest
 from bs4 import BeautifulSoup
 
 import wasc.default_checkers as dft
 
 BS_PARSER = "html.parser"
 FAIL = "échec"
-
-VALID_BASIC_HTML = """<!DOCTYPE html>
-<html lang="fr">
-    <head>
-    </head>
-    <body>
-    </body>
-    <footer>
-        <div>
-            Accessibilité : non conforme
-        </div
-    </footer>
-</html>
-"""
-
 
 class TestDoctypeChecker:
     def test_doctype_checker_init(self):
