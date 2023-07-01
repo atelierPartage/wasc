@@ -52,7 +52,7 @@ class TestAccessChecker:
     def test_access_checker_init(self):
         access_checker = dft.AccessChecker()
         assert access_checker.name == "AccessChecker"
-        assert access_checker.description == "Accessibilité"
+        assert access_checker.description == "Mention accessibilité"
 
     def test_access_checker_fail1(self):
         test_html = "<!DOCTYPE html><html><body><div></div></body></html>"
@@ -90,36 +90,68 @@ class TestAccessLinkChecker:
         assert access_link_checker.name == "AccessLinkChecker"
         assert access_link_checker.description == "Lien accessibilité"
 
-    def test_access_checker_valid_mention(self):
+    def test_access_link_checker_valid_mention(self):
         test_link = '<a href="/misc/accessibilite/">Accessibilité : totalement conforme</a>'
         test_html = "<!DOCTYPE html><html><body><div>" + test_link + "</div></body></html>"
         access_link_checker = dft.AccessLinkChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
         assert access_link_checker.execute(basic_webpage, "https://www.example.com") == "https://www.example.com/misc/accessibilite"
 
-    def test_access_checker_fail_mention(self):
+    def test_access_link_checker_fail_mention(self):
         test_html = "<!DOCTYPE html><html><body><div>Accessibilité : totalement conforme</div></body></html>"
         access_link_checker = dft.AccessLinkChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
         assert access_link_checker.execute(basic_webpage, "https://www.example.com") == FAIL
 
-    def test_access_checker_valid_other(self):
+    def test_access_link_checker_valid_other(self):
         test_link = '<a href="/accessibilite/">Accessibilité</a>'
         test_html = "<!DOCTYPE html><html><body><footer>" + test_link + "</footer></body></html>"
         access_link_checker = dft.AccessLinkChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
         assert access_link_checker.execute(basic_webpage, "https://www.example.com") == "https://www.example.com/accessibilite"
 
-    def test_access_checker_fail_other(self):
+    def test_access_link_checker_fail_other(self):
         test_link = '<a href="/misc/accessibilite/">Accessibilité</a>'
         test_html = "<!DOCTYPE html><html><body><footer>" + test_link + "</footer></body></html>"
         access_link_checker = dft.AccessLinkChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
         assert access_link_checker.execute(basic_webpage, "https://www.example.com") == FAIL
-    
-    def test_access_checker_fail_href(self):
+
+    def test_access_link_checker_fail_href(self):
         test_link = "<a>Accessibilité</a>"
         test_html = "<!DOCTYPE html><html><body><footer>" + test_link + "</footer></body></html>"
         access_link_checker = dft.AccessLinkChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
         assert access_link_checker.execute(basic_webpage, "https://www.example.com") == FAIL
+
+class TestMentionsLegalesChecker:
+    def test_mention_legales_checker_init(self):
+        mention_legales_checker = dft.MentionsLegalesChecker()
+        assert mention_legales_checker.name == "MentionsLegalesChecker"
+        assert mention_legales_checker.description == "Mentions légales"
+
+    def test_mention_legales_valid_mention1(self):
+        test_link = '<a href="/misc/mentions-legales/">Mentions légales</a>'
+        test_html = "<!DOCTYPE html><html><body><div>" + test_link + "</div></body></html>"
+        mention_legales_checker = dft.MentionsLegalesChecker()
+        basic_webpage = BeautifulSoup(test_html, BS_PARSER)
+        assert mention_legales_checker.execute(basic_webpage, "https://www.example.com") == "https://www.example.com/misc/mentions-legales"
+
+    def test_mention_legales_valid_mention2(self):
+        test_link = '<a href="/misc/mentions-legales/">mention legale</a>'
+        test_html = "<!DOCTYPE html><html><body><div>" + test_link + "</div></body></html>"
+        mention_legales_checker = dft.MentionsLegalesChecker()
+        basic_webpage = BeautifulSoup(test_html, BS_PARSER)
+        assert mention_legales_checker.execute(basic_webpage, "https://www.example.com") == "https://www.example.com/misc/mentions-legales"
+
+    def test_mention_legales_fail_mention(self):
+        test_html = "<!DOCTYPE html><html><body><div>Mentions légales</div></body></html>"
+        mention_legales_checker = dft.MentionsLegalesChecker()
+        basic_webpage = BeautifulSoup(test_html, BS_PARSER)
+        assert mention_legales_checker.execute(basic_webpage, "https://www.example.com") == FAIL
+
+    def test_mention_legales_valid_dftlink(self):
+        test_html = "<!DOCTYPE html><html><body><div>foo</div></body></html>"
+        mention_legales_checker = dft.MentionsLegalesChecker()
+        basic_webpage = BeautifulSoup(test_html, BS_PARSER)
+        assert mention_legales_checker.execute(basic_webpage, "https://www.gouvernement.fr") == "https://www.gouvernement.fr/mentions-legales"

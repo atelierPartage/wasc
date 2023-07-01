@@ -16,8 +16,6 @@ DFTT02(AbstractChecker) :
     Test the depth of tags <HEAD>
 DFTT05(AbstractChecker) :
     Test the presence of a compliance rate (%) on the accessibility statement
-DFTT06(AbstractChecker) :
-    Test the presence of "mention légales" link on the web page
 LangChecker(AbstractChecker) :
     Test the presence of the language in the header of the HTML page
 DoctypeChecker(AbstractChecker) :
@@ -26,6 +24,8 @@ AccessChecker(AbstractChecker) :
     Test the presence of "Accessibilité" in the page
 AccessLinkChecker(AbstractChecker) :
     Test if a link exist to the accessibility page
+MentionsLegalesChecker(AbstractChecker) :
+    Test the presence of "mention légales" link on the web page
 """
 import functools
 import re
@@ -212,98 +212,6 @@ class DFTT05(AbstractChecker) :
                 iter_limit -= 1
         return False
 
-
-class DFTT06(AbstractChecker) : #Enlever footer
-    """DFTT06
-    A class to represent the test of presence of "Mentions légales" link on the web page. This class
-    inherits from the AbstrastChecker class.
-
-    Attributes
-    ----------
-    name : str
-        The name of the checker
-
-    Methods
-    -------
-    execute(self, web_page, url) :
-        return the result of the checker
-    """
-    def __init__(self) :
-        """
-        It constructs all the necessary attributes for the DFTT06 class
-
-        Parameters
-        ----------
-        None
-        """
-        super().__init__("DFTT06", "Mentions légales")
-
-    def get_legal_url(self, tmp_url : str, root_url : str) -> str :
-        """
-        This method allows to retrieve the complete URL of the "Mentions légales" link.
-        home_url : the url of the home page
-
-        Parameters
-        ----------
-        tmp_url : str
-            The URL of "Mention légales" link
-        root_url : str
-            The root URL of the analyzed web page
-
-        Returns
-        -------
-        legal_url : str
-            The complete URL of the "Mentions légales" link
-        """
-        if tmp_url.startswith("http") :
-            legal_url = tmp_url
-        elif root_url.endswith("/fr") and tmp_url.startswith("/fr") :
-            legal_url = root_url + tmp_url[3:]
-        else :
-            home_url = root_url.split("/")
-            home_url = home_url[0] + "//" + home_url[2]
-            legal_url =  home_url + tmp_url
-        return legal_url
-
-    def execute(self, web_page : bs4.BeautifulSoup, root_url : str):
-        """
-        This method performs the test on the beautifulsoup object passed in parameter and determines
-        if there is a "Mentions légales" link on the web page, and if yes, it retrieves the complete
-        URL of the "Mentions légales" link
-
-        Parameters
-        ----------
-        web_page : bs4.BeautifulSoup
-            The BeautifulSoup object created from url
-        root_url : str
-            The root URL of the analyzed web page
-
-        Returns
-        -------
-        dict :
-            The name of the checker is the key and the value is either False if there is no
-            "Mentions légales" link, or it returns the URL of the link (str)
-        """
-        if web_page.footer :
-            for footer_string in web_page.footer.stripped_strings :
-                match_string = re.search(r"légales.*",\
-                                          footer_string, flags = re.IGNORECASE)
-                if not match_string :
-                    continue
-                legal_tag = web_page.footer.find(string = re.compile("légales",\
-                                                                       re.IGNORECASE)).parent
-                while legal_tag.name != "a" :
-                    legal_tag = legal_tag.parent
-                    if legal_tag.name == "html" :
-                        return False
-                try :
-                    tmp_url = legal_tag.attrs["href"]
-                except KeyError :
-                    return False
-                return self.get_legal_url(tmp_url, root_url)
-        return False
-
-
 class LangChecker(AbstractChecker) :
     """LangChecker
     Check the presence of attribute lang in the html tag of the website
@@ -436,7 +344,7 @@ class AccessChecker(AbstractChecker) :
         ----------
         None
         """
-        super().__init__("AccessChecker", "Accessibilité")
+        super().__init__("AccessChecker", "Mention accessibilité")
 
     def execute(self, web_page : bs4.BeautifulSoup, root_url : str):  # noqa: ARG002
         """
@@ -523,4 +431,65 @@ class AccessLinkChecker(AbstractChecker) :
                         return standard_link
                 except KeyError :
                     pass
+        return FAIL
+
+class MentionsLegalesChecker(AbstractChecker) :
+    """MentionsLegalesChecker
+    Test the presence of "Mentions légales" link on the web page.
+
+    Attributes
+    ----------
+    name : str
+        The name of the checker
+    description : str
+        Description of the checker
+
+    Methods
+    -------
+    execute(self, web_page, url) :
+        return the link to the page or fail
+    """
+    def __init__(self) :
+        """
+        It constructs all the necessary attributes for the MentionsLegalesChecker class
+
+        Parameters
+        ----------
+        None
+        """
+        super().__init__("MentionsLegalesChecker", "Mentions légales")
+
+    def execute(self, web_page : bs4.BeautifulSoup, root_url : str):
+        """
+        Try to find :
+        * text "Mentions légales" (case insensitive) and check if a link exists
+        * try the url root_url + "/mentions-legales" and check if a link exists
+        Return the link to "Mentions légales" page if it exists, else fail
+
+        Parameters
+        ----------
+        web_page : bs4.BeautifulSoup
+            The BeautifulSoup object created from url
+        root_url : str
+            The root URL of the analyzed web page
+
+        Returns
+        -------
+        str :
+            The link to "Mentions légales" page if it exists, else fail
+        """
+        motif = re.compile("Mentions* l[eé]gales*", re.IGNORECASE)
+        legal_tags = web_page.find_all(string = motif)
+        for tag in legal_tags:
+            legal_tag = tag
+            while legal_tag and legal_tag.name != "a" and legal_tag.name != "html":
+                legal_tag = legal_tag.parent
+            try :
+                return check_and_correct_url(legal_tag.attrs["href"], root_url)
+            except KeyError :
+                pass
+        legal_link = check_and_correct_url("mentions-legales", root_url)
+        response = requests.get(legal_link, headers=HEADER, timeout = 1)
+        if response.status_code == requests.codes.ok :
+            return legal_link
         return FAIL
