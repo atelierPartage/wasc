@@ -34,7 +34,7 @@ import bs4
 import requests
 
 from wasc.abstract_checker import AbstractChecker
-from wasc.utils import check_and_correct_url
+from wasc.utils import check_and_correct_url, find_link
 
 FAIL = "échec"
 
@@ -413,24 +413,27 @@ class AccessLinkChecker(AbstractChecker) :
             The name of the checker is the key and the value is either False if the mention
             "Accessibilité" / "Accessibility" is not a link, or it returns the URL of the link (str)
         """
-        link_url = ""
+        # 1- Check the link in the mention
         access_tag = web_page.find(string = ACCESS_PATTERN)
         if access_tag :
-            while access_tag and access_tag.name != "a" and access_tag.name != "html":
-                access_tag = access_tag.parent
+            link = find_link(access_tag, root_url)
+            if link :
+                return link
+        # 2 - Find text "Déclaration d'accessibilité" and check if it's a link
+        access_tag = web_page.find(string = "Déclaration d'accessibilité")
+        if access_tag :
+            link = find_link(access_tag, root_url)
+            if link :
+                return link
+        # 3 - Check if there exists a link to a standard adresse root_url/accessibilite
+        standard_link = check_and_correct_url("accessibilite", root_url)
+        link_tags = web_page.find_all("a")
+        for tag in link_tags:
             try :
-                return check_and_correct_url(access_tag.attrs["href"], root_url)
+                if check_and_correct_url(tag.attrs["href"], root_url) == standard_link:
+                    return standard_link
             except KeyError :
                 pass
-        if not link_url:
-            standard_link = check_and_correct_url("accessibilite", root_url)
-            link_tags = web_page.find_all("a")
-            for tag in link_tags:
-                try :
-                    if check_and_correct_url(tag.attrs["href"], root_url) == standard_link:
-                        return standard_link
-                except KeyError :
-                    pass
         return FAIL
 
 class MentionsLegalesChecker(AbstractChecker) :

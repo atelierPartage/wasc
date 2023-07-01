@@ -125,7 +125,10 @@ class Report :
             "user-agent" : "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36" ,
             "referer" : "https://www.google.com/"
             }
-        response = requests.get(self.url, headers=header, timeout = 1)
+        try:
+            response = requests.get(self.url, headers=header, timeout = 1)
+        except requests.exceptions.ReadTimeout:
+            return {"TimeOut" : self.url}
         if response.status_code == requests.codes.ok :
             self.__bs_obj = bs4.BeautifulSoup(response.content, "html.parser")
         else:

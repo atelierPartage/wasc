@@ -79,3 +79,11 @@ def check_and_correct_url(target_url : str, root_url : str) -> str :
 
     # Else concatenate
     return root_url + "/" + target_url
+
+def find_link(access_tag, root_url):
+    while access_tag and access_tag.name != "a" and access_tag.name != "html":
+        access_tag = access_tag.parent
+    try :
+        return check_and_correct_url(access_tag.attrs["href"], root_url)
+    except KeyError :
+        pass

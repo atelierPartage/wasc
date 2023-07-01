@@ -5,6 +5,7 @@ import json
 import sys
 
 import click
+from tqdm import tqdm
 
 from wasc.__about__ import __version__
 from wasc.criterion import Criterion
@@ -42,5 +43,8 @@ def wasc(websites, criteria, output, output_format):
     crit_list = [Criterion(crit, checkers) for crit, checkers in crit_dict.items()]
     websites = read_websites(websites)
     click.echo(f"Analysis of {len(websites)} websites...")
-    report = {label : Report(label, url, crit_list).execute() for label, url in websites}
+    report = {}
+    for i in tqdm(range(len(websites))):
+        label, url = websites[i]
+        report[label] = Report(label, url, crit_list).execute()
     click.echo(json.dumps(report, sort_keys=True, indent=4, ensure_ascii=False), file=output)
