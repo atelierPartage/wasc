@@ -4,11 +4,11 @@ Balise head :
 
 Mention Accessibilité :
   - AccessChecker
-  - DFTT04
+  - AccessLinkChecker
   - DFTT05
 
 Mention légale :
-  - DFTT06
+  - MentionsLegalesChecker
 
 Langage :
   - LangChecker
