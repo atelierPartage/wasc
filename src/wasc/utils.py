@@ -4,8 +4,6 @@
 """
 This module provides some reading functions
 """
-import csv
-
 import pandas as pd
 import yaml
 
@@ -88,3 +86,14 @@ def find_link(access_tag, root_url):
         return check_and_correct_url(access_tag.attrs["href"], root_url)
     except KeyError :
         pass
+
+def dict_to_csv(indict):
+    res = {"Organisation" : []}
+    for org, subdict in indict.items():
+        res["Organisation"].append(org)
+        for checkdict in subdict.values():
+            for key, val in checkdict.items():
+                if key not in res:
+                    res[key] = []
+                res[key].append(val)
+    return res

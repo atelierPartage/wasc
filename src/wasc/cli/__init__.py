@@ -5,12 +5,13 @@ import json
 import sys
 
 import click
+import pandas as pd
 from tqdm import tqdm
 
 from wasc.__about__ import __version__
 from wasc.criterion import Criterion
 from wasc.report import Report
-from wasc.utils import read_criteria_config, read_websites
+from wasc.utils import dict_to_csv, read_criteria_config, read_websites
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 DEFAULT_CRIT_DICT = { "Accessibilité" : ["AccessChecker", "AccessLinkChecker"], "Mentions légales" : ["MentionsLegalesChecker"]}
@@ -51,5 +52,9 @@ def wasc(websites, criteria, output, output_format):
         click.echo("Results:")
     else :
         click.echo("Save results in " + output.name)
-    click.echo(json.dumps(report, sort_keys=True, indent=4, ensure_ascii=False), file=output)
+    if output_format == "json":
+        click.echo(json.dumps(report, sort_keys=True, indent=4, ensure_ascii=False), file=output)
+    elif output_format == "csv":
+        res = dict_to_csv(report)
+        click.echo(pd.DataFrame(res).to_csv(sep=";", index=False), file=output)
     click.echo("Completed")
