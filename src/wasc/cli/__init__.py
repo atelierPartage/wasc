@@ -47,4 +47,9 @@ def wasc(websites, criteria, output, output_format):
     for i in tqdm(range(len(websites))):
         label, url = websites[i]
         report[label] = Report(label, url, crit_list).execute()
+    if output == sys.stdout:
+        click.echo("Results:")
+    else :
+        click.echo("Save results in " + output.name)
     click.echo(json.dumps(report, sort_keys=True, indent=4, ensure_ascii=False), file=output)
+    click.echo("Completed")
