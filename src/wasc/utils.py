@@ -6,6 +6,7 @@ This module provides some reading functions
 """
 import csv
 
+import pandas as pd
 import yaml
 
 
@@ -39,11 +40,11 @@ def read_websites(filename) :
 
     Returns
     -------
-     : dict
+     : list
         A list of of (websites, url)
     """
-    with open(filename, encoding = "utf-8") as url_file :
-        return [(line[0].strip(), line[1].strip()) for line in csv.reader(url_file)]
+    df = pd.read_csv(filename, sep=";", comment="#", header = None, names=["org", "url"], skipinitialspace=True)
+    return list(zip(df.org, df.url))
 
 def check_and_correct_url(target_url : str, root_url : str) -> str :
     """
