@@ -1,0 +1,14 @@
+site_name: Wasc
+site_description: Web Accessibility Simple Checker
+site_author: Guillaume Collet
+repo_url: https://github.com/gcollet/wasc
+
+theme:
+  name: material
+
+nav:
+    - Home: index.md
+    - About: 
+        - License : license.md
+        - Release notes: releases.md
+    - Checkers: checkers.md
