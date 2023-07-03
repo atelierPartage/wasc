@@ -61,7 +61,6 @@ WACS_CRITERIA_DEFAULT_PATH = "./data/default_criteria.yml"
 
 [tool.hatch.envs.default.scripts]
 test = "pytest -v {args:tests}"
-all_test = "pytest tests/__init__.py"
 test-cov = "coverage run -m pytest {args:tests}"
 lcov = "coverage lcov"
 cov-report = [
@@ -72,7 +71,7 @@ cov = [
   "test-cov",
   "cov-report",
 ]
-all_cov = [
+test_all = [
   "test-cov tests/__init__.py",
   "cov-report",
   "lcov",
