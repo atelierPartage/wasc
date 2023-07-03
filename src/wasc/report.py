@@ -12,6 +12,8 @@ Audit
 import bs4
 import requests
 
+from wasc.utils import HEADER
+
 
 class Report :
     """
@@ -121,12 +123,8 @@ class Report :
             The dictionary containing the test results for each criterion and
             each URL
         """
-        header = {
-            "user-agent" : "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36" ,
-            "referer" : "https://www.google.com/"
-            }
         try:
-            response = requests.get(self.url, headers=header, timeout = 1)
+            response = requests.get(self.url, headers=HEADER, timeout = 1)
         except requests.exceptions.ReadTimeout:
             return {"TimeOut" : self.url}
         if response.status_code == requests.codes.ok :
