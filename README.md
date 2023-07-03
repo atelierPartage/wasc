@@ -2,12 +2,13 @@
 
 [![PyPI - Version](https://img.shields.io/pypi/v/wasc.svg)](https://pypi.org/project/wasc)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/wasc.svg)](https://pypi.org/project/wasc)
-
+[![Docs](https://github.com/atelierPartage/wasc/actions/workflows/docs.yml/badge.svg)](https://github.com/atelierPartage/wasc/actions/workflows/docs.yml) |
 -----
 
 **Table of Contents**
 
 - [wasc](#wasc)
+  - [ |](#-)
   - [Installation](#installation)
   - [License](#license)
   - [Developpement](#developpement)
