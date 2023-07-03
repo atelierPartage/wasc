@@ -12,9 +12,10 @@ class TestReadCriteria:
     def test_read_crit_example(self):
         expected_criteria = {
             "Balise head" : ["DFTT01", "DFTT02"],
-            "Mention Accessibilité" : ["DFTT03", "DFTT04", "DFTT05"],
-            "Mention légale" : ["DFTT06"],
-            "Langage" : ["DFTT07"]
+            "Mention Accessibilité" : ["AccessChecker", "AccessLinkChecker", "AccessRateChecker"],
+            "Mention légale" : ["MentionsLegalesChecker"],
+            "Langage" : ["LangChecker"],
+            "Doctype" : ["DoctypeChecker"]
         }
         crit_example = utils.read_criteria_config("tests/data/crit_example.yml")
         assert isinstance(crit_example, dict)

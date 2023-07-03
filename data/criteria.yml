@@ -5,7 +5,7 @@ Balise head :
 Mention Accessibilité :
   - AccessChecker
   - AccessLinkChecker
-  - DFTT05
+  - AccessRateChecker
 
 Mentions légales :
   - MentionsLegalesChecker

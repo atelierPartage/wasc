@@ -80,7 +80,7 @@ class CheckerFactory :
 checker_factory = CheckerFactory()
 checker_factory.register("DFTT01", dft.DFTT01)
 checker_factory.register("DFTT02", dft.DFTT02)
-checker_factory.register("DFTT05", dft.DFTT05)
+checker_factory.register("AccessRateChecker", dft.AccessRateChecker)
 checker_factory.register("LangChecker", dft.LangChecker)
 checker_factory.register("DoctypeChecker", dft.DoctypeChecker)
 checker_factory.register("AccessChecker", dft.AccessChecker)

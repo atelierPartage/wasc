@@ -3,12 +3,15 @@ Balise head :
   - DFTT02
 
 Mention Accessibilité :
-  - DFTT03
-  - DFTT04
-  - DFTT05
+  - AccessChecker
+  - AccessLinkChecker
+  - AccessRateChecker
 
 Mention légale :
-  - DFTT06
+  - MentionsLegalesChecker
 
 Langage :
-  - DFTT07
+  - LangChecker
+
+Doctype :
+  - DoctypeChecker

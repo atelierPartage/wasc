@@ -14,18 +14,18 @@ DFTT01(AbstractChecker) :
     Test the presence of tags <HEAD>
 DFTT02(AbstractChecker) :
     Test the depth of tags <HEAD>
-DFTT05(AbstractChecker) :
-    Test the presence of a compliance rate (%) on the accessibility statement
-LangChecker(AbstractChecker) :
-    Test the presence of the language in the header of the HTML page
-DoctypeChecker(AbstractChecker) :
-    Test the presence of Doctype in the web page
 AccessChecker(AbstractChecker) :
     Test the presence of "Accessibilité" in the page
 AccessLinkChecker(AbstractChecker) :
     Test if a link exist to the accessibility page
+AccessRateChecker(AbstractChecker) :
+    Test the presence of a compliance rate (%) on the accessibility statement
 MentionsLegalesChecker(AbstractChecker) :
     Test the presence of "mention légales" link on the web page
+LangChecker(AbstractChecker) :
+    Test the presence of the language in the header of the HTML page
+DoctypeChecker(AbstractChecker) :
+    Test the presence of Doctype in the web page
 """
 import functools
 import re
@@ -34,15 +34,9 @@ import bs4
 import requests
 
 from wasc.abstract_checker import AbstractChecker
-from wasc.utils import check_and_correct_url, find_link
+from wasc.utils import HEADER, check_and_correct_url, find_link
 
 FAIL = "échec"
-
-HEADER = {
-    "user-agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 \
-        (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36" ,
-    "referer" : "https://www.google.com/"
-    }
 mentions = "non|partiellement|totalement"
 ACCESS_PATTERN = re.compile("Accessibilité[ \xa0]:[ \xa0](" + mentions + ")[ \xa0]conforme", re.IGNORECASE)
 
@@ -127,198 +121,6 @@ class DFTT02(AbstractChecker) :
         """
         head_tag = web_page.find_all("head")
         return [len(list(tag.parents)) - 1 for tag in head_tag] if head_tag else []
-
-class DFTT05(AbstractChecker) :
-    """DFTT05
-    A class to represent the test of presence of compliance rate (%) on the accessibility statement
-    web page. This class inherits from the AbstrastChecker class.
-
-    Attributes
-    ----------
-    name : str
-        The name of the checker
-
-    Methods
-    -------
-    execute(self, web_page, url) :
-        return the result of the checker
-    """
-    def __init__(self) :
-        """
-        It constructs all the necessary attributes for the DFTT05 class
-
-        Parameters
-        ----------
-        None
-        """
-        super().__init__("DFTT05", "Taux d'accessibilité")
-
-    def execute(self, web_page : bs4.BeautifulSoup, root_url : str):
-        """
-        This method performs the test on the beautifulsoup object passed in parameter and determines
-        if there is a compliance rate (%) on the accessibility statement web page or not
-
-        Parameters
-        ----------
-        web_page : bs4.BeautifulSoup
-            The BeautifulSoup object created from url
-        root_url : str
-            The root URL of the analyzed web page
-
-        Returns
-        -------
-        dict :
-            The name of the checker is the key and the value is either False if there is no
-            compliance rate (%), or the compliance rate (%)
-        """
-        checker_04 = AccessLinkChecker()
-        access_url = checker_04.execute(web_page, root_url)
-        if not access_url :
-            return False
-        response = requests.get(access_url, headers=HEADER, timeout = 1)
-        if response.status_code == requests.codes.ok :
-            access_page = bs4.BeautifulSoup(response.content, "html.parser")
-        else :
-            msg = f"The status_code is {response.status_code}, check the URL : {access_url}"
-            raise ValueError(msg)
-        for access_string in access_page.stripped_strings :
-            match_string = re.search(r"Résultats des tests.*",access_string, \
-                                     flags = re.IGNORECASE)
-            if not match_string :
-                continue
-            access_tag = access_page.find(string = re.compile("Résultats des tests",\
-                                                                   re.IGNORECASE)).parent
-            iter_limit = 10
-            while iter_limit :
-                for tag in access_tag.next_siblings :
-                    if tag.name :
-                        statement = tag.find(string = re.compile("%"))
-                        if statement :
-                            statement_str = str(statement)
-                            try:
-                                index = statement_str.index("%")
-                                counter = 0
-                                for j in range(index-1, index-10, -1) :
-                                    if statement_str[j] in "0123456789 ,." :
-                                        counter += 1
-                                    else :
-                                        break
-                                compliance_tmp = statement_str[index - counter:index + 1].split(" ")
-                                compliance = functools.reduce(lambda x, y : x + y, compliance_tmp)
-                                return compliance
-                            except ValueError:
-                                continue
-                access_tag = access_tag.parent
-                iter_limit -= 1
-        return False
-
-class LangChecker(AbstractChecker) :
-    """LangChecker
-    Check the presence of attribute lang in the html tag of the website
-
-    Attributes
-    ----------
-    name : str
-        The name of the checker
-    description : str
-        Description of the checker
-
-    Methods
-    -------
-    execute(self, web_page, url) :
-        return the lang string or "non conforme"
-    """
-    def __init__(self) :
-        """
-        Sets the name and description of LangChecker
-
-        Parameters
-        ----------
-        None
-        """
-        super().__init__("LangChecker", "Lang")
-
-    def execute(self, web_page : bs4.BeautifulSoup, root_url : str):  # noqa: ARG002
-        """
-        If the language is specified in the html tag, returns a string
-        corresponding to the language of the web page, else "non conforme"
-
-        Parameters
-        ----------
-        web_page : bs4.BeautifulSoup
-            The BeautifulSoup object created url
-        root_url : str
-            The root URL of the analyzed web page
-
-        Returns
-        -------
-        str :
-            the string of language or "non conforme"
-        """
-        try :
-            return web_page.html.attrs["lang"]
-        except KeyError :
-            return FAIL
-
-class DoctypeChecker(AbstractChecker) :
-    """DoctypeChecker
-    Check the presence of DOCTYPE at the beginning of HTML document
-    (before <html>) + the type is html
-
-    Attributes
-    ----------
-    name : str
-        The name of the checker
-    description : str
-        Description of the checker
-
-    Methods
-    -------
-    execute(self, web_page, url) :
-        return "html" or "non conforme"
-    """
-    def __init__(self) :
-        """
-        Sets the name and description of DoctypeChecker
-
-        Parameters
-        ----------
-        None
-        """
-        super().__init__("DoctypeChecker", "Doctype")
-
-    def execute(self, web_page : bs4.BeautifulSoup, root_url : str):  # noqa: ARG002
-        """
-        Check the presence of doctype in html document
-
-        Parameters
-        ----------
-        web_page : bs4.BeautifulSoup
-            The BeautifulSoup object created url
-        root_url : str
-            The root URL of the analyzed web page
-
-        Returns
-        -------
-        bool :
-            True if Doctype is present, before <html> and has "html" value
-        """
-        current_pos = 0
-        doctype_pos = 1
-        html_pos = 0
-        doctype_found = False
-        for item in web_page.contents:
-            if isinstance(item, bs4.Doctype):
-                doctype_pos = current_pos
-                doctype_found = True
-                if item != "html":
-                    return FAIL
-            elif isinstance(item, bs4.Tag) and item.name == "html":
-                html_pos = current_pos
-            current_pos += 1
-        if doctype_found and doctype_pos < html_pos:
-            return "html"
-        return FAIL
 
 class AccessChecker(AbstractChecker) :
     """AccessChecker
@@ -436,6 +238,91 @@ class AccessLinkChecker(AbstractChecker) :
                 pass
         return FAIL
 
+class AccessRateChecker(AbstractChecker) :
+    """AccessRateChecker
+    A class to represent the test of presence of compliance rate (%) on the accessibility statement
+    web page. This class inherits from the AbstrastChecker class.
+
+    Attributes
+    ----------
+    name : str
+        The name of the checker
+
+    Methods
+    -------
+    execute(self, web_page, url) :
+        return the result of the checker
+    """
+    def __init__(self) :
+        """
+        It constructs all the necessary attributes for the AccessRateChecker class
+
+        Parameters
+        ----------
+        None
+        """
+        super().__init__("AccessRateChecker", "Taux d'accessibilité")
+
+    def execute(self, web_page : bs4.BeautifulSoup, root_url : str):
+        """
+        This method performs the test on the beautifulsoup object passed in parameter and determines
+        if there is a compliance rate (%) on the accessibility statement web page or not
+
+        Parameters
+        ----------
+        web_page : bs4.BeautifulSoup
+            The BeautifulSoup object created from url
+        root_url : str
+            The root URL of the analyzed web page
+
+        Returns
+        -------
+        dict :
+            The name of the checker is the key and the value is either False if there is no
+            compliance rate (%), or the compliance rate (%)
+        """
+        checker_04 = AccessLinkChecker()
+        access_url = checker_04.execute(web_page, root_url)
+        if not access_url :
+            return False
+        response = requests.get(access_url, headers=HEADER, timeout = 1)
+        if response.status_code == requests.codes.ok :
+            access_page = bs4.BeautifulSoup(response.content, "html.parser")
+        else :
+            msg = f"The status_code is {response.status_code}, check the URL : {access_url}"
+            raise ValueError(msg)
+        for access_string in access_page.stripped_strings :
+            match_string = re.search(r"Résultats des tests.*",access_string, \
+                                     flags = re.IGNORECASE)
+            if not match_string :
+                continue
+            if isinstance(access_page, bs4.NavigableString):
+                access_tag = access_page.find(string = re.compile("Résultats des tests",\
+                                                                   re.IGNORECASE)).parent
+            iter_limit = 10
+            while iter_limit and isinstance(access_tag, bs4.Tag) :
+                for tag in access_tag.next_siblings :
+                    if isinstance(tag, bs4.Tag) and tag.name :
+                        statement = tag.find(string = re.compile("%"))
+                        if statement :
+                            statement_str = str(statement)
+                            try:
+                                index = statement_str.index("%")
+                                counter = 0
+                                for j in range(index-1, index-10, -1) :
+                                    if statement_str[j] in "0123456789 ,." :
+                                        counter += 1
+                                    else :
+                                        break
+                                compliance_tmp = statement_str[index - counter:index + 1].split(" ")
+                                compliance = functools.reduce(lambda x, y : x + y, compliance_tmp)
+                                return compliance
+                            except ValueError:
+                                continue
+                access_tag = access_tag.parent
+                iter_limit -= 1
+        return False
+
 class MentionsLegalesChecker(AbstractChecker) :
     """MentionsLegalesChecker
     Test the presence of "Mentions légales" link on the web page.
@@ -495,4 +382,113 @@ class MentionsLegalesChecker(AbstractChecker) :
         response = requests.get(legal_link, headers=HEADER, timeout = 1)
         if response.status_code == requests.codes.ok :
             return legal_link
+        return FAIL
+
+class LangChecker(AbstractChecker) :
+    """LangChecker
+    Check the presence of attribute lang in the html tag of the website
+
+    Attributes
+    ----------
+    name : str
+        The name of the checker
+    description : str
+        Description of the checker
+
+    Methods
+    -------
+    execute(self, web_page, url) :
+        return the lang string or "non conforme"
+    """
+    def __init__(self) :
+        """
+        Sets the name and description of LangChecker
+
+        Parameters
+        ----------
+        None
+        """
+        super().__init__("LangChecker", "Lang")
+
+    def execute(self, web_page : bs4.BeautifulSoup, root_url : str):  # noqa: ARG002
+        """
+        If the language is specified in the html tag, returns a string
+        corresponding to the language of the web page, else "non conforme"
+
+        Parameters
+        ----------
+        web_page : bs4.BeautifulSoup
+            The BeautifulSoup object created url
+        root_url : str
+            The root URL of the analyzed web page
+
+        Returns
+        -------
+        str :
+            the string of language or "non conforme"
+        """
+        try :
+            if isinstance(web_page.html, bs4.Tag):
+                return web_page.html.attrs["lang"]
+        except KeyError :
+            return FAIL
+
+class DoctypeChecker(AbstractChecker) :
+    """DoctypeChecker
+    Check the presence of DOCTYPE at the beginning of HTML document
+    (before <html>) + the type is html
+
+    Attributes
+    ----------
+    name : str
+        The name of the checker
+    description : str
+        Description of the checker
+
+    Methods
+    -------
+    execute(self, web_page, url) :
+        return "html" or "non conforme"
+    """
+    def __init__(self) :
+        """
+        Sets the name and description of DoctypeChecker
+
+        Parameters
+        ----------
+        None
+        """
+        super().__init__("DoctypeChecker", "Doctype")
+
+    def execute(self, web_page : bs4.BeautifulSoup, root_url : str):  # noqa: ARG002
+        """
+        Check the presence of doctype in html document
+
+        Parameters
+        ----------
+        web_page : bs4.BeautifulSoup
+            The BeautifulSoup object created url
+        root_url : str
+            The root URL of the analyzed web page
+
+        Returns
+        -------
+        bool :
+            True if Doctype is present, before <html> and has "html" value
+        """
+        current_pos = 0
+        doctype_pos = 1
+        html_pos = 0
+        doctype_found = False
+        for item in web_page.contents:
+            if isinstance(item, bs4.Doctype):
+                doctype_pos = current_pos
+                doctype_found = True
+                if item != "html":
+                    return FAIL
+            elif isinstance(item, bs4.Tag) and item.name == "html":
+                html_pos = current_pos
+            current_pos += 1
+        if doctype_found and doctype_pos < html_pos:
+            return "html"
         return FAIL
