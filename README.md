@@ -24,6 +24,10 @@ pip install wasc
 ## License
 
 `wasc` is distributed under the terms of the [CECILL-2.1](https://spdx.org/licenses/CECILL-2.1.html) license.
+`wasc` was created by (Licensors) :
+* Juliette Francis
+* François le Berre
+* Guillaume Collet
 
 ## Developpement
 
