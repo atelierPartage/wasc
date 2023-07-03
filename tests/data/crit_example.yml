@@ -8,7 +8,7 @@ Mention Accessibilité :
   - AccessRateChecker
 
 Mention légale :
-  - MentionsLegalesChecker
+  - LegalChecker
 
 Langage :
   - LangChecker

@@ -20,7 +20,7 @@ AccessLinkChecker(AbstractChecker) :
     Test if a link exist to the accessibility page
 AccessRateChecker(AbstractChecker) :
     Test the presence of a compliance rate (%) on the accessibility statement
-MentionsLegalesChecker(AbstractChecker) :
+LegalChecker(AbstractChecker) :
     Test the presence of "mention légales" link on the web page
 LangChecker(AbstractChecker) :
     Test the presence of the language in the header of the HTML page
@@ -323,8 +323,8 @@ class AccessRateChecker(AbstractChecker) :
                 iter_limit -= 1
         return False
 
-class MentionsLegalesChecker(AbstractChecker) :
-    """MentionsLegalesChecker
+class LegalChecker(AbstractChecker) :
+    """LegalChecker
     Test the presence of "Mentions légales" link on the web page.
 
     Attributes
@@ -341,13 +341,13 @@ class MentionsLegalesChecker(AbstractChecker) :
     """
     def __init__(self) :
         """
-        It constructs all the necessary attributes for the MentionsLegalesChecker class
+        It constructs all the necessary attributes for the LegalChecker class
 
         Parameters
         ----------
         None
         """
-        super().__init__("MentionsLegalesChecker", "Mentions légales")
+        super().__init__("LegalChecker", "Mentions légales")
 
     def execute(self, web_page : bs4.BeautifulSoup, root_url : str):
         """

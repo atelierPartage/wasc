@@ -13,7 +13,7 @@ class TestReadCriteria:
         expected_criteria = {
             "Balise head" : ["DFTT01", "DFTT02"],
             "Mention Accessibilité" : ["AccessChecker", "AccessLinkChecker", "AccessRateChecker"],
-            "Mention légale" : ["MentionsLegalesChecker"],
+            "Mention légale" : ["LegalChecker"],
             "Langage" : ["LangChecker"],
             "Doctype" : ["DoctypeChecker"]
         }

@@ -125,35 +125,35 @@ class TestAccessLinkChecker:
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
         assert access_link_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == FAIL
 
-class TestMentionsLegalesChecker:
+class TestLegalChecker:
     def test_mention_legales_checker_init(self):
-        mention_legales_checker = dft.MentionsLegalesChecker()
-        assert mention_legales_checker.name == "MentionsLegalesChecker"
+        mention_legales_checker = dft.LegalChecker()
+        assert mention_legales_checker.name == "LegalChecker"
         assert mention_legales_checker.description == "Mentions légales"
 
     def test_mention_legales_valid_mention1(self):
         test_html = DEFAULT_HTML_HEAD + '<a href="/misc/mentions-legales/">Mentions légales</a>' + DEFAULT_HTML_TAIL
-        mention_legales_checker = dft.MentionsLegalesChecker()
+        mention_legales_checker = dft.LegalChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
         answer = DEFAULT_HTML_ROOT + "/misc/mentions-legales"
         assert mention_legales_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == answer
 
     def test_mention_legales_valid_mention2(self):
         test_html = DEFAULT_HTML_HEAD + '<a href="/misc/mentions-legales/">mention legale</a>' + DEFAULT_HTML_TAIL
-        mention_legales_checker = dft.MentionsLegalesChecker()
+        mention_legales_checker = dft.LegalChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
         answer = DEFAULT_HTML_ROOT + "/misc/mentions-legales"
         assert mention_legales_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == answer
 
     def test_mention_legales_fail_mention(self):
         test_html = DEFAULT_HTML_HEAD + "Mentions légales" + DEFAULT_HTML_TAIL
-        mention_legales_checker = dft.MentionsLegalesChecker()
+        mention_legales_checker = dft.LegalChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
         assert mention_legales_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == FAIL
 
     def test_mention_legales_valid_dftlink(self):
         test_html = DEFAULT_HTML_HEAD + "foo" + DEFAULT_HTML_TAIL
-        mention_legales_checker = dft.MentionsLegalesChecker()
+        mention_legales_checker = dft.LegalChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
         answer = "https://www.gouvernement.fr/mentions-legales"
         assert mention_legales_checker.execute(basic_webpage, "https://www.gouvernement.fr/") == answer
