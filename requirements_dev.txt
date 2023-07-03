@@ -1,0 +1,11 @@
+beautifulsoup4
+click
+coverage
+hatch
+hatchling
+pandas
+pytest
+pytest-cov
+pyyaml
+requests
+tqdm
