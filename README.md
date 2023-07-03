@@ -28,6 +28,8 @@ pip install wasc
 * François le Berre
 * Guillaume Collet
 
+`wasc` main contact is [contact@latelierpartage.fr](mailto:contact@latelierpartage.fr)
+
 For details about the license, see file [LICENSE.txt](https://github.com/atelierPartage/wasc/blob/main/LICENSE.txt)
 ## Developpement
 
