@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "wasc"
 dynamic = ["version"]
-description = 'wasc, for Web Accessibility Simple Checker, helps to evaluate accessibility criteria on a list of websites'
+description = 'Web Accessibility Simple Checker'
 readme = "README.md"
 requires-python = ">=3.7"
 license = "CECILL-2.1"
