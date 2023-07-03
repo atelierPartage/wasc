@@ -11,6 +11,7 @@
   - [Installation](#installation)
   - [License](#license)
   - [Developpement](#developpement)
+    - [install dependencies](#install-dependencies)
     - [Running wasc with hatch](#running-wasc-with-hatch)
     - [Testing wasc with hatch](#testing-wasc-with-hatch)
 
@@ -29,6 +30,9 @@ pip install wasc
 Full source code is available on github : [https://github.com/gcollet/wasc](https://github.com/gcollet/wasc)
 The project is developed under hatch project manager ([hatch.pypa.io](https://hatch.pypa.io/latest/))
 
+### install dependencies
+The dependencies are managed with hatch environment system.
+It is **not necessary** to install using `pip install -r requirements_dev.txt` but the file is present if needed.
 ### Running wasc with hatch
 In `wasc` directory, use hatch to run wasc in the default environnement :
 `hatch run wasc data/url_example.csv`
