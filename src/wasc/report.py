@@ -27,21 +27,20 @@ class Report :
         The URL of the website
     bs_obj : BeautifulSoup
         The BeautifulSoup object created
-    crit_list : list
-        The list of criteria
+    checkers_list : list
+        The list of checkers
 
     Methods
     -------
     bs_dict(self) :
         returns a dictionary containing URLs associated with their
         BeautifulSoup objects
-    crit_list(self) :
-        returns the list of criteria to analyze
+    checkers_list(self) :
+        returns the list of checkers
     execute(self) :
-        returns a dictionary containing the test results for each criterion and
-        each URL
+        returns a dictionary containing, for each URL, the test results for each checker
     """
-    def __init__(self, label : str, url : str, criteria : list) :
+    def __init__(self, label : str, url : str, checkers : list) :
         """
         It constructs all the necessary attributes for the report object
 
@@ -51,29 +50,20 @@ class Report :
             The description of the website
         url : str
             The URL of the website
-        crit_dict : dict
-            The dictionary of criteria names associated to their checkers
-            names to analyze
+        checkers_list : list
+            The list of checkers
 
         Raises
         ------
         ValueError
             if the dictionary of URLs is empty
-            if the dictionary of criteria is empty
+            if the list of checkers is empty
         """
-        if not label :
-            msg = "No label given"
-            raise ValueError(msg)
-        if not url :
-            msg = "No URL given"
-            raise ValueError(msg)
-        if not criteria :
-            msg = "No criterion given in criteria list"
-            raise ValueError(msg)
         self.__label = label
         self.__url = url
         self.__bs_obj = None
-        self.__criteria = criteria
+        self.__checkers = checkers
+        self.__error = ""
 
     @property
     def url(self) :
@@ -109,9 +99,9 @@ class Report :
 
     def execute(self) :
         """
-        This method returns dictionary containing the test results for each
-        criterion and each URL. It goes through the criteria list and the
-        BeautifulSoup object dictionary and analyzes each criterion for each URL
+        This method returns a DataFrame containing test results where:
+            * Each line correspond to an organisation (one URL)
+            * Each column correspond to a checker
 
         Parameters
         ----------
@@ -125,14 +115,12 @@ class Report :
         """
         try:
             response = requests.get(self.url, headers=HEADER, timeout = 1)
-        except requests.exceptions.ReadTimeout:
-            return {"TimeOut" : self.url}
-        if response.status_code == requests.codes.ok :
-            self.__bs_obj = bs4.BeautifulSoup(response.content, "html.parser")
-        else:
-            return {"bad response" : response.status_code}
-        result = {}
-        if self.__bs_obj:
-            for crit in self.__criteria :
-                result[crit.name] = crit.execute(self.__bs_obj, self.url)
-        return result
+            if response.status_code == requests.codes.ok :
+                self.__bs_obj = bs4.BeautifulSoup(response.content, "html.parser")
+            else:
+                self.__error = "HTML Error Status " + str(response.status_code)
+        except Exception as e:
+            self.__error = str(e)
+        starter = [self.__label, self.__url, self.__error]
+        results = [checker.execute(self.__bs_obj, self.url) if self.__bs_obj else "" for checker in self.__checkers]
+        return starter + results

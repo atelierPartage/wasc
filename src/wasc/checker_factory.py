@@ -77,6 +77,35 @@ class CheckerFactory :
         """
         return self.__checker_dict[checker_name]()
 
+    def available(self):
+        """
+        Returns the list of checkers names
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        : list
+        The list of checkers names
+        """
+        return list(self.__checker_dict.keys())
+
+    def is_registered(self, checker_name : str):
+        """
+        Returns the list of checkers as pair (checker.name, checker.description)
+
+        Parameters
+        ----------
+        checker_name : str
+            A checker name
+        Returns
+        -------
+        : bool
+        True is the checker name is known
+        """
+        return checker_name in self.__checker_dict
+
 checker_factory = CheckerFactory()
 checker_factory.register("DFTT01", dft.DFTT01)
 checker_factory.register("DFTT02", dft.DFTT02)

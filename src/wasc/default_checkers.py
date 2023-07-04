@@ -247,6 +247,8 @@ class AccessRateChecker(AbstractChecker) :
     ----------
     name : str
         The name of the checker
+    description : str
+        Description of the checker
 
     Methods
     -------

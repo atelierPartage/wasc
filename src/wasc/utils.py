@@ -5,7 +5,6 @@
 This module provides some reading functions
 """
 import pandas as pd
-import yaml
 
 HEADER = {
     "user-agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 \
@@ -13,24 +12,22 @@ HEADER = {
     "referer" : "https://www.google.com/"
     }
 
-def read_criteria_config(filename) :
+def read_checkers(filename) :
     """
-    Reads the list of criteria.
-    Each criterion is associated with a list of checkers
-    The file must be in YAML format.
+    Reads the list of checkers.
 
     Parameters
     ----------
     filename : str
-        File name containing list of criteria
+        File name containing list of checkers
 
     Returns
     -------
-    config_data : dict
-        A dictionary of criteria associated with the list of checkers
+    : list
+        A list of checker names
     """
     with open(filename, encoding = "utf-8") as config_file :
-        return yaml.safe_load(config_file)
+        return [line.strip() for line in config_file]
 
 def read_websites(filename) :
     """
@@ -92,13 +89,6 @@ def find_link(access_tag, root_url):
     except KeyError :
         pass
 
-def dict_to_csv(indict):
-    res = {"Organisation" : []}
-    for org, subdict in indict.items():
-        res["Organisation"].append(org)
-        for checkdict in subdict.values():
-            for key, val in checkdict.items():
-                if key not in res:
-                    res[key] = []
-                res[key].append(val)
+def report_to_csv(reports, checkers_list):
+    res = []
     return res

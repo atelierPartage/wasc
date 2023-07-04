@@ -3,30 +3,24 @@ import pytest
 from wasc import utils
 
 
-class TestReadCriteria:
+class TestReadCheckers:
     def test_no_file(self):
         with pytest.raises(FileNotFoundError):
-            utils.read_criteria_config("foo.txt")
-    def test_not_yaml(self):
-        utils.read_criteria_config("tests/data/url_example.csv")
+            utils.read_checkers("foo.txt")
     def test_read_crit_example(self):
-        expected_criteria = {
-            "Balise head" : ["DFTT01", "DFTT02"],
-            "Mention Accessibilité" : ["AccessChecker", "AccessLinkChecker", "AccessRateChecker"],
-            "Mention légale" : ["LegalChecker"],
-            "Langage" : ["LangChecker"],
-            "Doctype" : ["DoctypeChecker"]
+        expected_checkers = {
+            "DFTT01", "DFTT02",
+            "AccessChecker", "AccessLinkChecker", "AccessRateChecker",
+            "LegalChecker", "LangChecker", "DoctypeChecker"
         }
-        crit_example = utils.read_criteria_config("tests/data/crit_example.yml")
-        assert isinstance(crit_example, dict)
-        for key, value in crit_example.items():
-            assert key in expected_criteria.keys()
-            assert value in expected_criteria.values()
+        read_checkers = utils.read_checkers("tests/data/checkers_example.csv")
+        assert isinstance(read_checkers, list)
+        assert set(read_checkers) == expected_checkers
 
 class TestReadWebsites:
     def test_no_file(self):
         with pytest.raises(FileNotFoundError):
-            utils.read_criteria_config("foo.txt")
+            utils.read_websites("foo.txt")
     def test_read_url_example(self):
         expected_url = [
             ("Design Gouv", "https://design.numerique.gouv.fr/"),

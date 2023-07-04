@@ -29,7 +29,6 @@ classifiers = [
 
 dependencies = [
   "click",
-  "pyyaml",
   "beautifulsoup4",
   "requests",
   "tqdm",

@@ -7,22 +7,20 @@ import sys
 import click
 import pandas as pd
 from tqdm import tqdm
+from pprint import pprint
 
 from wasc.__about__ import __version__
-from wasc.criterion import Criterion
+from wasc.checker_factory import checker_factory
 from wasc.report import Report
-from wasc.utils import dict_to_csv, read_criteria_config, read_websites
+from wasc.utils import read_checkers, read_websites, report_to_csv
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
-DEFAULT_CRIT_DICT = {
-    "Accessibilité" : ["AccessChecker", "AccessLinkChecker"],
-    "Mentions légales" : ["LegalChecker"]
-    }
+DEFAULT_CHECKERS = ["AccessChecker", "AccessLinkChecker", "DoctypeChecker", "LangChecker", "LegalChecker"]
 
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.argument("websites", type=click.Path(exists=True))
-@click.option("-c", "--criteria", type=click.Path(exists=True),
-              help="Criteria configuration file (yaml)")
+@click.option("-c", "--checkers", type=click.Path(exists=True),
+              help="Checkers list to use")
 @click.option("-o", "--output", default=sys.stdout,
               type=click.File("w"),
               help="Output file [default=stdout]")
@@ -30,7 +28,7 @@ DEFAULT_CRIT_DICT = {
               type=click.Choice(["json", "csv"], case_sensitive=False),
               help="Output format [default=json]")
 @click.version_option(version=__version__, prog_name="wasc")
-def wasc(websites, criteria, output, output_format):
+def wasc(websites, checkers, output, output_format):
     """
     wasc, for Websites Accessibility Criteria Checker,
     helps to evaluate accessibility criteria on a list of websites
@@ -38,26 +36,30 @@ def wasc(websites, criteria, output, output_format):
     WEBSITES is a CSV file containing a list of websites as couples
     (label,URL)
     """
-    crit_dict = DEFAULT_CRIT_DICT
-    if criteria:
-        click.echo(f"Read criteria from {criteria}")
-        crit_dict = read_criteria_config(criteria)
+    checker_names = DEFAULT_CHECKERS
+    if checkers:
+        click.echo(f"Read checkers from {checkers}")
+        checker_names = read_checkers(checkers)
     else :
-        click.echo("Use default criteria")
-    crit_list = [Criterion(crit, checkers) for crit, checkers in crit_dict.items()]
+        click.echo("Use default checkers")
+    checkers_list = [checker_factory.create(checker_name) for checker_name in checker_names]
+    column_names = ["Organisation", "URL", "Erreur"]
+    column_names += [checker.description for checker in checkers_list]
     websites = read_websites(websites)
     click.echo(f"Analysis of {len(websites)} websites...")
-    report = {}
+    reports = []
     for i in tqdm(range(len(websites))):
         label, url = websites[i]
-        report[label] = Report(label, url, crit_list).execute()
+        reports.append(Report(label, url, checkers_list).execute())
+    df = pd.DataFrame(reports, columns=column_names)
+    df.set_index(["Organisation"], inplace=True)
     if output == sys.stdout:
         click.echo("Results:")
     else :
         click.echo("Save results in " + output.name)
     if output_format == "json":
-        click.echo(json.dumps(report, sort_keys=True, indent=4, ensure_ascii=False), file=output)
+        json_load = json.loads(df.to_json(force_ascii=False, orient="index"))
+        click.echo(json.dumps(json_load, sort_keys=True, indent=4, ensure_ascii=False), file=output)
     elif output_format == "csv":
-        res = dict_to_csv(report)
-        click.echo(pd.DataFrame(res).to_csv(sep=";", index=False), file=output)
+        click.echo(df.to_csv(sep=";"), file=output)
     click.echo("Completed")
