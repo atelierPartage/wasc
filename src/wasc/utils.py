@@ -88,7 +88,3 @@ def find_link(access_tag, root_url):
         return check_and_correct_url(access_tag.attrs["href"], root_url)
     except KeyError :
         pass
-
-def report_to_csv(reports, checkers_list):
-    res = []
-    return res
