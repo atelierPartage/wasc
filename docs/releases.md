@@ -7,13 +7,19 @@ You can determine your currently installed version using:
 
 ```bash
 $ wasc --version
-wasc, version 0.2.0
+wasc, version 0.3.0
 ```
 
 ## Maintenance team
 The current and past members of the wasc team.
 
 [@gcollet](https://github.com/gcollet)
+
+## Version 0.3.0 (2023-07-05)
+* Major code simplication by removing two classes Criterion and Report that are useless
+* The main function only store results in lists that are used to initiate a DataFrame
+* This simplification may allow parallel analyses
+* Bugfix: use pandas DataFrame to correctly export results in CSV
 
 ## Version 0.2.0 (2023-07-03)
 * Include `pandas` to simplify CSV reading/writing (and for future production of dataframe through API)
