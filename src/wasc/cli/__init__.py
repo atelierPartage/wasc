@@ -4,15 +4,15 @@
 import json
 import sys
 
+import bs4
 import click
 import pandas as pd
+import requests
 from tqdm import tqdm
-from pprint import pprint
 
 from wasc.__about__ import __version__
 from wasc.checker_factory import checker_factory
-from wasc.report import Report
-from wasc.utils import read_checkers, read_websites, report_to_csv
+from wasc.utils import HEADER, read_checkers, read_websites
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 DEFAULT_CHECKERS = ["AccessChecker", "AccessLinkChecker", "DoctypeChecker", "LangChecker", "LegalChecker"]
@@ -30,12 +30,13 @@ DEFAULT_CHECKERS = ["AccessChecker", "AccessLinkChecker", "DoctypeChecker", "Lan
 @click.version_option(version=__version__, prog_name="wasc")
 def wasc(websites, checkers, output, output_format):
     """
-    wasc, for Websites Accessibility Criteria Checker,
+    Websites Accessibility Criteria Checker,
     helps to evaluate accessibility criteria on a list of websites
 
     WEBSITES is a CSV file containing a list of websites as couples
-    (label,URL)
+    "label";"URL"
     """
+    # Reads and creates checker list
     checker_names = DEFAULT_CHECKERS
     if checkers:
         click.echo(f"Read checkers from {checkers}")
@@ -43,16 +44,36 @@ def wasc(websites, checkers, output, output_format):
     else :
         click.echo("Use default checkers")
     checkers_list = [checker_factory.create(checker_name) for checker_name in checker_names]
-    column_names = ["Organisation", "URL", "Erreur"]
-    column_names += [checker.description for checker in checkers_list]
+
+    # Sets column names for DataFrame using checkers descriptions
+    column_names = ["Organisation", "URL", "Erreur"] + [checker.description for checker in checkers_list]
+
+    # Reads the list of web sites
     websites = read_websites(websites)
+
+    # Launch analysis
     click.echo(f"Analysis of {len(websites)} websites...")
-    reports = []
+    results = []
     for i in tqdm(range(len(websites))):
         label, url = websites[i]
-        reports.append(Report(label, url, checkers_list).execute())
-    df = pd.DataFrame(reports, columns=column_names)
+        bs_obj, error = "", ""
+        try:
+            response = requests.get(url, headers=HEADER, timeout = 1)
+            if response.status_code == requests.codes.ok :
+                bs_obj = bs4.BeautifulSoup(response.content, "html.parser")
+            else:
+                error = "HTML Error Status " + str(response.status_code)
+        except Exception as e:
+            error = str(e)
+        starter = [label, url, error]
+        analysis = [checker.execute(bs_obj, url) if bs_obj else "" for checker in checkers_list]
+        results.append(starter + analysis)
+
+    # Creates the DataFrame from results
+    df = pd.DataFrame(results, columns=column_names)
     df.set_index(["Organisation"], inplace=True)
+
+    # Output results given -o output and -f output_format
     if output == sys.stdout:
         click.echo("Results:")
     else :
