@@ -10,6 +10,7 @@
 - [Web Accessibility Simple Checker](#web-accessibility-simple-checker)
   - [](#)
   - [Installation](#installation)
+  - [Usage](#usage)
   - [License](#license)
   - [Developpement](#developpement)
     - [Dependencies](#dependencies)
@@ -21,7 +22,26 @@
 ```console
 pip install wasc
 ```
+## Usage
 
+```bash
+Usage: wasc [OPTIONS] WEBSITES
+
+  Websites Accessibility Criteria Checker, helps to 
+  evaluate accessibility on a list of websites
+
+  WEBSITES is a CSV file containing a list of websites 
+  as couples "label";"URL"
+
+Options:
+  -c, --checkers PATH             Path to the list of checkers
+  -o, --output FILENAME           Output file [default=stdout]
+  -f, --output_format [json|csv]  Output format [default=json]
+  --version                       Show the version and exit.
+  -h, --help                      Show this message and exit.
+```
+
+Example files are given in `data` directory
 ## License
 
 `wasc` is distributed under the terms of the [CECILL-2.1](https://spdx.org/licenses/CECILL-2.1.html) license by the following licensors :
