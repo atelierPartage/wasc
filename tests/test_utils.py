@@ -9,7 +9,7 @@ class TestReadCheckers:
             utils.read_checkers("foo.txt")
     def test_read_crit_example(self):
         expected_checkers = {
-            "DFTT01", "DFTT02",
+            "HeadNbChecker", "DFTT02",
             "AccessChecker", "AccessLinkChecker", "AccessRateChecker",
             "LegalChecker", "LangChecker", "DoctypeChecker"
         }

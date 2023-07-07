@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: CECILL-2.1
 """
-Module default_checker
+Module checkers
 
 Provides custom classes of checkers inherited from AbstractChecker.
 Checkers are used to analyze the content of web pages as Beautiful soup objects.
@@ -10,7 +10,7 @@ Present Checkers were defined with the help of François le Berre.
 
 Classes
 -------
-DFTT01(AbstractChecker) :
+HeadNbChecker(AbstractChecker) :
     Test the presence of tags <HEAD>
 DFTT02(AbstractChecker) :
     Test the depth of tags <HEAD>
@@ -40,10 +40,9 @@ FAIL = "échec"
 mentions = "non|partiellement|totalement"
 ACCESS_PATTERN = re.compile("Accessibilité[ \xa0]:[ \xa0](" + mentions + ")[ \xa0]conforme", re.IGNORECASE)
 
-class DFTT01(AbstractChecker) :
-    """DFTT01
-    A class to test the presence of <head> tags.
-    This class inherits from the AbstrastChecker.
+class HeadNbChecker(AbstractChecker) :
+    """HeadNbChecker
+    A class to test the number of <head> tags in a page.
 
     Attributes
     ----------
@@ -55,10 +54,10 @@ class DFTT01(AbstractChecker) :
     Methods
     -------
     execute(self, web_page, url) -> dict :
-        return the result of the checker
+        return the number of <head> tags (expected 1)
     """
     def __init__(self) :
-        super().__init__("DFTT01", "Nombre de <head>")
+        super().__init__("HeadNbChecker", "Nombre de <head>")
 
     def execute(self, web_page : bs4.BeautifulSoup, root_url : str):  # noqa: ARG002
         """

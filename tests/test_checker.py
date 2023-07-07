@@ -1,7 +1,7 @@
 
 from bs4 import BeautifulSoup
 
-import wasc.default_checkers as dft
+import wasc.checkers as dft
 
 BS_PARSER = "html.parser"
 FAIL = "échec"
@@ -157,3 +157,9 @@ class TestLegalChecker:
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
         answer = "https://www.gouvernement.fr/mentions-legales"
         assert mention_legales_checker.execute(basic_webpage, "https://www.gouvernement.fr/") == answer
+
+class TestHeadNbChecker:
+    def test_head_nb_checker_init(self):
+        head_nb_checker = dft.HeadNbChecker()
+        assert head_nb_checker.name == "HeadNbChecker"
+        assert head_nb_checker.description == "Nombre de <head>"

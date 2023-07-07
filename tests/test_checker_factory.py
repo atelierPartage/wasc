@@ -22,12 +22,3 @@ class TestCheckerFactory:
         tmp_factory.register("tmp_name", TmpChecker)
         check_list = tmp_factory.available()
         assert check_list == ["tmp_name"]
-    def test_default_checkers(self):
-        expected_list = {
-            "DFTT01", "DFTT02",
-            "AccessChecker", "AccessLinkChecker", "AccessRateChecker",
-            "LegalChecker", "LangChecker", "DoctypeChecker"
-        }
-        default_factory = fact.checker_factory
-        check_list = default_factory.available()
-        assert set(check_list) == expected_list

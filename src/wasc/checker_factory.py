@@ -16,7 +16,7 @@ Objects
 -------
 checker_factory
 """
-import wasc.default_checkers as dft
+import wasc.checkers as dft
 
 
 class CheckerFactory :
@@ -107,7 +107,7 @@ class CheckerFactory :
         return checker_name in self.__checker_dict
 
 checker_factory = CheckerFactory()
-checker_factory.register("DFTT01", dft.DFTT01)
+checker_factory.register("HeadNbChecker", dft.HeadNbChecker)
 checker_factory.register("DFTT02", dft.DFTT02)
 checker_factory.register("AccessRateChecker", dft.AccessRateChecker)
 checker_factory.register("LangChecker", dft.LangChecker)
