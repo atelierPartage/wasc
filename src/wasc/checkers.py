@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: CECILL-2.1
 
-import functools
 import re
 
 import bs4
@@ -145,16 +144,7 @@ class AccessLinkChecker(AbstractChecker) :
             link = find_link(access_tag, root_url)
             if link :
                 return link
-        # 3 - Check if there exists a link to a standard adresse root_url/accessibilite
-        standard_link = check_and_correct_url("accessibilite", root_url)
-        link_tags = web_page.find_all("a")
-        for tag in link_tags:
-            try :
-                if check_and_correct_url(tag.attrs["href"], root_url) == standard_link:
-                    return standard_link
-            except KeyError :
-                pass
-        # 3 - Check if there exists a link that ends with "accessibilite" or "accessibility"
+        # 3 - Check if there exists a link that ends with accessibilite or accessibility
         link_tags = web_page.find_all("a")
         for tag in link_tags:
             try :
@@ -186,51 +176,23 @@ class AccessRateChecker(AbstractChecker) :
 
         Returns
         -------
-        dict :
-            The name of the checker is the key and the value is either False if there is no
-            compliance rate (%), or the compliance rate (%)
+        str :
+            the compliance rate (%), or "échec" if not found
         """
-        checker_04 = AccessLinkChecker()
-        access_url = checker_04.execute(web_page, root_url)
-        if not access_url :
-            return False
-        response = requests.get(access_url, headers=HEADER, timeout = 1)
+        link_url = AccessLinkChecker().execute(web_page, root_url)
+        if link_url == FAIL:
+            return FAIL
+        response = requests.get(link_url, headers=HEADER, timeout = 1)
         if response.status_code == requests.codes.ok :
-            access_page = bs4.BeautifulSoup(response.content, "html.parser")
-        else :
-            msg = f"The status_code is {response.status_code}, check the URL : {access_url}"
-            raise ValueError(msg)
-        for access_string in access_page.stripped_strings :
-            match_string = re.search(r"Résultats des tests.*",access_string, \
-                                     flags = re.IGNORECASE)
-            if not match_string :
-                continue
-            if isinstance(access_page, bs4.NavigableString):
-                access_tag = access_page.find(string = re.compile("Résultats des tests",\
-                                                                   re.IGNORECASE)).parent
-            iter_limit = 10
-            while iter_limit and isinstance(access_tag, bs4.Tag) :
-                for tag in access_tag.next_siblings :
-                    if isinstance(tag, bs4.Tag) and tag.name :
-                        statement = tag.find(string = re.compile("%"))
-                        if statement :
-                            statement_str = str(statement)
-                            try:
-                                index = statement_str.index("%")
-                                counter = 0
-                                for j in range(index-1, index-10, -1) :
-                                    if statement_str[j] in "0123456789 ,." :
-                                        counter += 1
-                                    else :
-                                        break
-                                compliance_tmp = statement_str[index - counter:index + 1].split(" ")
-                                compliance = functools.reduce(lambda x, y : x + y, compliance_tmp)
-                                return compliance
-                            except ValueError:
-                                continue
-                access_tag = access_tag.parent
-                iter_limit -= 1
-        return False
+            link_page = bs4.BeautifulSoup(response.content, "html.parser")
+            motif = re.compile(r"%", re.IGNORECASE)
+            percent_tags = link_page.find_all(string = motif)
+            for tag in percent_tags:
+                if "conformité" in tag:
+                    m = re.search(r"\s(100|(\d{1,2}(\.\d+)*))", str(tag))
+                    if m:
+                        return str(m[1]) + "%"
+        return FAIL
 
 class LegalChecker(AbstractChecker) :
     """LegalChecker

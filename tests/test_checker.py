@@ -97,11 +97,11 @@ class TestAccessLinkChecker:
         assert access_link_checker.description == "Lien accessibilité"
 
     def test_access_link_checker_valid_mention(self):
-        test_link = '<a href="/misc/accessibilite/">Accessibilité : totalement conforme</a>'
+        test_link = '<a href="/accessibilite/">Accessibilité : non conforme</a>'
         test_html = DEFAULT_HTML_HEAD + test_link + DEFAULT_HTML_TAIL
         access_link_checker = dft.AccessLinkChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
-        answer = DEFAULT_HTML_ROOT + "/misc/accessibilite"
+        answer = DEFAULT_HTML_ROOT + "/accessibilite"
         assert access_link_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == answer
 
     def test_access_link_checker_fail_mention(self):
@@ -136,6 +136,35 @@ class TestAccessLinkChecker:
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
         answer = DEFAULT_HTML_ROOT + "/misc/accessibilite"
         assert access_link_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == answer
+
+class TestAccessRateChecker:
+    def test_access_rate_checker_init(self):
+        access_rate_checker = dft.AccessRateChecker()
+        assert access_rate_checker.name == "AccessRateChecker"
+        assert access_rate_checker.description == "Taux d'accessibilité"
+
+    def test_access_rate_checker_valid(self):
+        """
+        Be Careful, this test use a real url that may change over time
+        """
+        test_link = '<a href="/misc/accessibilite/">Accessibilité : totalement conforme</a>'
+        test_html = DEFAULT_HTML_HEAD + test_link + DEFAULT_HTML_TAIL
+        access_rate_checker = dft.AccessRateChecker()
+        basic_webpage = BeautifulSoup(test_html, BS_PARSER)
+        assert access_rate_checker.execute(basic_webpage, "https://design.numerique.gouv.fr") == "100%"
+
+    def test_access_rate_checker_fail_link(self):
+        test_html = DEFAULT_HTML_HEAD + "Accessibilité : non conforme" + DEFAULT_HTML_TAIL
+        access_rate_checker = dft.AccessRateChecker()
+        basic_webpage = BeautifulSoup(test_html, BS_PARSER)
+        assert access_rate_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == FAIL
+
+    def test_access_rate_checker_fail_link2(self):
+        test_link = '<a href="/misc/accessibilite/">Accessibilité : totalement conforme</a>'
+        test_html = DEFAULT_HTML_HEAD + test_link + DEFAULT_HTML_TAIL
+        access_rate_checker = dft.AccessRateChecker()
+        basic_webpage = BeautifulSoup(test_html, BS_PARSER)
+        assert access_rate_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == FAIL
 
 class TestLegalChecker:
     def test_mention_legales_checker_init(self):

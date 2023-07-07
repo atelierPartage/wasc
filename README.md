@@ -63,8 +63,10 @@ The project is developed under hatch project manager ([hatch.pypa.io](https://ha
 It is **not necessary** to install dependencies using `pip install -r requirements_dev.txt` but the file is present if needed.
 ### Running wasc with hatch
 In `wasc` directory, use hatch to run wasc in the default environnement :
+
 `hatch run wasc data/url_example.csv`
 
 ### Testing wasc with hatch
 In `wasc` directory, use hatch to test wasc files in the default environnement :
+
 `hatch run test_all`
