@@ -56,7 +56,8 @@ def wasc(websites, checkers, output, output_format):
     results = []
     for i in tqdm(range(len(websites))):
         label, url = websites[i]
-        bs_obj, error = "", ""
+        bs_obj = None
+        error = ""
         try:
             response = requests.get(url, headers=HEADER, timeout = 1)
             if response.status_code == requests.codes.ok :
@@ -66,7 +67,9 @@ def wasc(websites, checkers, output, output_format):
         except Exception as e:
             error = str(e)
         starter = [label, url, error]
-        analysis = [checker.execute(bs_obj, url) if bs_obj else "" for checker in checkers_list]
+        analysis = ["échec" for _ in checkers_list]
+        if not error:
+            analysis = [checker.execute(bs_obj, url) if bs_obj else "" for checker in checkers_list]
         results.append(starter + analysis)
 
     # Creates the DataFrame from results
