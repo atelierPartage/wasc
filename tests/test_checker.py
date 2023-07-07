@@ -1,4 +1,6 @@
-
+# SPDX-FileCopyrightText: 2023-present Guillaume Collet <bilouweb@free.fr>
+#
+# SPDX-License-Identifier: CECILL-2.1
 from bs4 import BeautifulSoup
 
 import wasc.checkers as dft
@@ -6,9 +8,10 @@ import wasc.checkers as dft
 BS_PARSER = "html.parser"
 FAIL = "échec"
 
-DEFAULT_HTML_HEAD = "<!DOCTYPE html><html><body><div>"
+DEFAULT_HTML_HEAD = "<!DOCTYPE html><html><head></head><body><div>"
 DEFAULT_HTML_TAIL = "</div></body></html>"
 DEFAULT_HTML_ROOT = "https://www.example.com"
+
 class TestDoctypeChecker:
     def test_doctype_checker_init(self):
         doctype_checker = dft.DoctypeChecker()
@@ -117,13 +120,22 @@ class TestAccessLinkChecker:
         test_html = DEFAULT_HTML_HEAD + '<a href="/misc/accessibilite/">Accessibilité</a>' + DEFAULT_HTML_TAIL
         access_link_checker = dft.AccessLinkChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
-        assert access_link_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == FAIL
+        answer = DEFAULT_HTML_ROOT + "/misc/accessibilite"
+        assert access_link_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == answer
 
     def test_access_link_checker_fail_href(self):
         test_html = DEFAULT_HTML_HEAD + "<a>Accessibilité</a>" + DEFAULT_HTML_TAIL
         access_link_checker = dft.AccessLinkChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
         assert access_link_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == FAIL
+
+    def test_access_link_checker_decla(self):
+        test_link = '<a href="/misc/accessibilite/">Déclaration d\'accessibilité</a>'
+        test_html = DEFAULT_HTML_HEAD + test_link + DEFAULT_HTML_TAIL
+        access_link_checker = dft.AccessLinkChecker()
+        basic_webpage = BeautifulSoup(test_html, BS_PARSER)
+        answer = DEFAULT_HTML_ROOT + "/misc/accessibilite"
+        assert access_link_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == answer
 
 class TestLegalChecker:
     def test_mention_legales_checker_init(self):
@@ -163,3 +175,45 @@ class TestHeadNbChecker:
         head_nb_checker = dft.HeadNbChecker()
         assert head_nb_checker.name == "HeadNbChecker"
         assert head_nb_checker.description == "Nombre de <head>"
+    def test_head_nb_valid_01(self):
+        test_html = DEFAULT_HTML_HEAD + DEFAULT_HTML_TAIL
+        head_nb_checker = dft.HeadNbChecker()
+        basic_webpage = BeautifulSoup(test_html, BS_PARSER)
+        answer = 1
+        assert head_nb_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == answer
+    def test_head_nb_valid_02(self):
+        test_html = DEFAULT_HTML_HEAD + "<head></head>" + DEFAULT_HTML_TAIL
+        head_nb_checker = dft.HeadNbChecker()
+        basic_webpage = BeautifulSoup(test_html, BS_PARSER)
+        answer = 2
+        assert head_nb_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == answer
+    def test_head_nb_fail(self):
+        test_html = "<!DOCTYPE html><html><body></body></html>"
+        head_nb_checker = dft.HeadNbChecker()
+        basic_webpage = BeautifulSoup(test_html, BS_PARSER)
+        answer = 0
+        assert head_nb_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == answer
+
+class TestHeadLvlChecker:
+    def test_head_lvl_checker_init(self):
+        head_lvl_checker = dft.HeadLvlChecker()
+        assert head_lvl_checker.name == "HeadLvlChecker"
+        assert head_lvl_checker.description == "Profondeurs des <head>"
+    def test_head_lvl_valid_01(self):
+        test_html = DEFAULT_HTML_HEAD + DEFAULT_HTML_TAIL
+        head_lvl_checker = dft.HeadLvlChecker()
+        basic_webpage = BeautifulSoup(test_html, BS_PARSER)
+        answer = [1]
+        assert head_lvl_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == answer
+    def test_head_lvl_valid_02(self):
+        test_html = DEFAULT_HTML_HEAD + "<head></head>" + DEFAULT_HTML_TAIL
+        head_lvl_checker = dft.HeadLvlChecker()
+        basic_webpage = BeautifulSoup(test_html, BS_PARSER)
+        answer = [1,3]
+        assert head_lvl_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == answer
+    def test_head_lvl_fail(self):
+        test_html = "<!DOCTYPE html><html><body></body></html>"
+        head_lvl_checker = dft.HeadLvlChecker()
+        basic_webpage = BeautifulSoup(test_html, BS_PARSER)
+        answer = []
+        assert head_lvl_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == answer

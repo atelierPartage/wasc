@@ -108,7 +108,7 @@ class CheckerFactory :
 
 checker_factory = CheckerFactory()
 checker_factory.register("HeadNbChecker", dft.HeadNbChecker)
-checker_factory.register("DFTT02", dft.DFTT02)
+checker_factory.register("HeadLvlChecker", dft.HeadLvlChecker)
 checker_factory.register("AccessRateChecker", dft.AccessRateChecker)
 checker_factory.register("LangChecker", dft.LangChecker)
 checker_factory.register("DoctypeChecker", dft.DoctypeChecker)

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2023-present Guillaume Collet <bilouweb@free.fr>
+#
+# SPDX-License-Identifier: CECILL-2.1
 import pytest
 
 from wasc import utils
@@ -9,7 +12,7 @@ class TestReadCheckers:
             utils.read_checkers("foo.txt")
     def test_read_crit_example(self):
         expected_checkers = {
-            "HeadNbChecker", "DFTT02",
+            "HeadNbChecker", "HeadLvlChecker",
             "AccessChecker", "AccessLinkChecker", "AccessRateChecker",
             "LegalChecker", "LangChecker", "DoctypeChecker"
         }

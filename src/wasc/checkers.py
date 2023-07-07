@@ -1,32 +1,7 @@
 # SPDX-FileCopyrightText: 2023-present Guillaume Collet <bilouweb@free.fr>
 #
 # SPDX-License-Identifier: CECILL-2.1
-"""
-Module checkers
 
-Provides custom classes of checkers inherited from AbstractChecker.
-Checkers are used to analyze the content of web pages as Beautiful soup objects.
-Present Checkers were defined with the help of François le Berre.
-
-Classes
--------
-HeadNbChecker(AbstractChecker) :
-    Test the presence of tags <HEAD>
-DFTT02(AbstractChecker) :
-    Test the depth of tags <HEAD>
-AccessChecker(AbstractChecker) :
-    Test the presence of "Accessibilité" in the page
-AccessLinkChecker(AbstractChecker) :
-    Test if a link exist to the accessibility page
-AccessRateChecker(AbstractChecker) :
-    Test the presence of a compliance rate (%) on the accessibility statement
-LegalChecker(AbstractChecker) :
-    Test the presence of "mention légales" link on the web page
-LangChecker(AbstractChecker) :
-    Test the presence of the language in the header of the HTML page
-DoctypeChecker(AbstractChecker) :
-    Test the presence of Doctype in the web page
-"""
 import functools
 import re
 
@@ -77,30 +52,12 @@ class HeadNbChecker(AbstractChecker) :
         """
         return len(web_page.find_all(name="head"))
 
-class DFTT02(AbstractChecker) :
-    """DFTT02
-    A class to get the depth of <head> tags in a web page.
-    This class inherits from the AbstrastChecker.
-
-    Attributes
-    ----------
-    name : str
-        The name of the checker
-
-    Methods
-    -------
-    execute(self, web_page, url) :
-        return the result of the checker
+class HeadLvlChecker(AbstractChecker) :
+    """HeadLvlChecker
+    Get the depth of <head> tags in a web page.
     """
     def __init__(self) :
-        """
-        It constructs all the necessary attributes for the DFTT02 class
-
-        Parameters
-        ----------
-        None
-        """
-        super().__init__("DFTT02", "Profondeur des <head>")
+        super().__init__("HeadLvlChecker", "Profondeurs des <head>")
 
     def execute(self, web_page : bs4.BeautifulSoup, root_url : str):  # noqa: ARG002
         """
@@ -123,28 +80,9 @@ class DFTT02(AbstractChecker) :
 
 class AccessChecker(AbstractChecker) :
     """AccessChecker
-    Check the presence of "Accessibilité" mention on the web page.
-
-    Attributes
-    ----------
-    name : str
-        The name of the checker
-    description : str
-        Description of the checker
-
-    Methods
-    -------
-    execute(self, web_page, url) :
-        return the level string or "non conforme"
+    Check the presence of "Accessibilité" RGAA4 mention on the web page.
     """
     def __init__(self) :
-        """
-        Sets the name and description of AccessChecker
-
-        Parameters
-        ----------
-        None
-        """
         super().__init__("AccessChecker", "Mention accessibilité")
 
     def execute(self, web_page : bs4.BeautifulSoup, root_url : str):  # noqa: ARG002
@@ -171,28 +109,9 @@ class AccessChecker(AbstractChecker) :
 
 class AccessLinkChecker(AbstractChecker) :
     """AccessLinkChecker
-    Check that "Accessibilité" present on the web page is a link.
-
-    Attributes
-    ----------
-    name : str
-        The name of the checker
-    description : str
-        Description of the checker
-
-    Methods
-    -------
-    execute(self, web_page, url) :
-        return the link URL
+    Check if a link ot an accessibility statement exists
     """
     def __init__(self) :
-        """
-        It constructs all the necessary attributes for the AccessLinkChecker class
-
-        Parameters
-        ----------
-        None
-        """
         super().__init__("AccessLinkChecker", "Lien accessibilité")
 
     def execute(self, web_page : bs4.BeautifulSoup, root_url : str):
@@ -235,33 +154,22 @@ class AccessLinkChecker(AbstractChecker) :
                     return standard_link
             except KeyError :
                 pass
+        # 3 - Check if there exists a link that ends with "accessibilite" or "accessibility"
+        link_tags = web_page.find_all("a")
+        for tag in link_tags:
+            try :
+                current_link = check_and_correct_url(tag.attrs["href"], root_url)
+                if current_link.endswith("accessibility") or current_link.endswith("accessibilite"):
+                    return current_link
+            except KeyError :
+                pass
         return FAIL
 
 class AccessRateChecker(AbstractChecker) :
     """AccessRateChecker
-    A class to represent the test of presence of compliance rate (%) on the accessibility statement
-    web page. This class inherits from the AbstrastChecker class.
-
-    Attributes
-    ----------
-    name : str
-        The name of the checker
-    description : str
-        Description of the checker
-
-    Methods
-    -------
-    execute(self, web_page, url) :
-        return the result of the checker
+    Get compliance rate (%) on the accessibility statement (if it exists)
     """
     def __init__(self) :
-        """
-        It constructs all the necessary attributes for the AccessRateChecker class
-
-        Parameters
-        ----------
-        None
-        """
         super().__init__("AccessRateChecker", "Taux d'accessibilité")
 
     def execute(self, web_page : bs4.BeautifulSoup, root_url : str):
@@ -327,27 +235,8 @@ class AccessRateChecker(AbstractChecker) :
 class LegalChecker(AbstractChecker) :
     """LegalChecker
     Test the presence of "Mentions légales" link on the web page.
-
-    Attributes
-    ----------
-    name : str
-        The name of the checker
-    description : str
-        Description of the checker
-
-    Methods
-    -------
-    execute(self, web_page, url) :
-        return the link to the page or fail
     """
     def __init__(self) :
-        """
-        It constructs all the necessary attributes for the LegalChecker class
-
-        Parameters
-        ----------
-        None
-        """
         super().__init__("LegalChecker", "Mentions légales")
 
     def execute(self, web_page : bs4.BeautifulSoup, root_url : str):
@@ -388,27 +277,8 @@ class LegalChecker(AbstractChecker) :
 class LangChecker(AbstractChecker) :
     """LangChecker
     Check the presence of attribute lang in the html tag of the website
-
-    Attributes
-    ----------
-    name : str
-        The name of the checker
-    description : str
-        Description of the checker
-
-    Methods
-    -------
-    execute(self, web_page, url) :
-        return the lang string or "non conforme"
     """
     def __init__(self) :
-        """
-        Sets the name and description of LangChecker
-
-        Parameters
-        ----------
-        None
-        """
         super().__init__("LangChecker", "Lang")
 
     def execute(self, web_page : bs4.BeautifulSoup, root_url : str):  # noqa: ARG002
@@ -436,29 +306,9 @@ class LangChecker(AbstractChecker) :
 
 class DoctypeChecker(AbstractChecker) :
     """DoctypeChecker
-    Check the presence of DOCTYPE at the beginning of HTML document
-    (before <html>) + the type is html
-
-    Attributes
-    ----------
-    name : str
-        The name of the checker
-    description : str
-        Description of the checker
-
-    Methods
-    -------
-    execute(self, web_page, url) :
-        return "html" or "non conforme"
+    Check the presence of <!DOCTYPE html> at the beginning of HTML document (before <html>)
     """
     def __init__(self) :
-        """
-        Sets the name and description of DoctypeChecker
-
-        Parameters
-        ----------
-        None
-        """
         super().__init__("DoctypeChecker", "Doctype")
 
     def execute(self, web_page : bs4.BeautifulSoup, root_url : str):  # noqa: ARG002
