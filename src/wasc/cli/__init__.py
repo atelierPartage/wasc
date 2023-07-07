@@ -21,12 +21,12 @@ DEFAULT_CHECKERS = ["AccessChecker", "AccessLinkChecker", "DoctypeChecker", "Lan
 @click.argument("websites", type=click.Path(exists=True))
 @click.option("-c", "--checkers", type=click.Path(exists=True),
               help="Checkers list to use")
-@click.option("-o", "--output", default=sys.stdout,
-              type=click.File("w"),
-              help="Output file [default=stdout]")
 @click.option("-f", "--output_format", default = "json",
               type=click.Choice(["json", "csv"], case_sensitive=False),
               help="Output format [default=json]")
+@click.option("-o", "--output", default=sys.stdout,
+              type=click.File("w"),
+              help="Output file [default=stdout]")
 @click.version_option(version=__version__, prog_name="wasc")
 def wasc(websites, checkers, output, output_format):
     """

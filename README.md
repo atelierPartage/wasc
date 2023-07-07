@@ -35,8 +35,8 @@ Usage: wasc [OPTIONS] WEBSITES
 
 Options:
   -c, --checkers PATH             Path to the list of checkers
-  -o, --output FILENAME           Output file [default=stdout]
   -f, --output_format [json|csv]  Output format [default=json]
+  -o, --output FILENAME           Output file [default=stdout]
   --version                       Show the version and exit.
   -h, --help                      Show this message and exit.
 ```
