@@ -10,6 +10,7 @@ import requests
 from wasc.abstract_checker import AbstractChecker
 from wasc.utils import HEADER, check_and_correct_url, find_link
 
+PRESENT = "présent"
 FAIL = "échec"
 mentions = "non|partiellement|totalement"
 ACCESS_PATTERN = re.compile("Accessibilité[ \xa0]:[ \xa0](" + mentions + ")[ \xa0]conforme", re.IGNORECASE)
@@ -286,8 +287,8 @@ class DoctypeChecker(AbstractChecker) :
 
         Returns
         -------
-        bool :
-            True if Doctype is present, before <html> and has "html" value
+        str :
+            return "html" if valid else "échec"
         """
         current_pos = 0
         doctype_pos = 1
@@ -305,3 +306,39 @@ class DoctypeChecker(AbstractChecker) :
         if doctype_found and doctype_pos < html_pos:
             return "html"
         return FAIL
+
+class HeaderChecker(AbstractChecker) :
+    """HeaderChecker
+    Check the presence of a unique <header> tag
+    """
+    def __init__(self) :
+        super().__init__("HeaderChecker", "Header")
+
+    def execute(self, web_page : bs4.BeautifulSoup, root_url : str):  # noqa: ARG002
+        """
+        Check the presence of a unique <header> tag in web_page
+
+        Returns
+        -------
+        str :
+            return "present" if valid else "échec"
+        """
+        return PRESENT if len(web_page.find_all(name="header")) == 1 else FAIL
+
+class FooterChecker(AbstractChecker) :
+    """FooterChecker
+    Check the presence of a unique <footer> tag
+    """
+    def __init__(self) :
+        super().__init__("FooterChecker", "Footer")
+
+    def execute(self, web_page : bs4.BeautifulSoup, root_url : str):  # noqa: ARG002
+        """
+        Check the presence of a unique <footer> tag in web_page
+
+        Returns
+        -------
+        str :
+            return "present" if valid else "échec"
+        """
+        return PRESENT if len(web_page.find_all(name="footer")) == 1 else FAIL
