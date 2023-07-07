@@ -67,4 +67,4 @@ In `wasc` directory, use hatch to run wasc in the default environnement :
 
 ### Testing wasc with hatch
 In `wasc` directory, use hatch to test wasc files in the default environnement :
-`hatch run test test_all`
+`hatch run test_all`
