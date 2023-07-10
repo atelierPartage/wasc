@@ -7,13 +7,12 @@ import sys
 import bs4
 import click
 import pandas as pd
-import requests
 from tqdm import tqdm
 from trafilatura.downloads import add_to_compressed_dict, buffered_downloads, load_download_buffer
 
 from wasc.__about__ import __version__
 from wasc.checker_factory import checker_factory
-from wasc.utils import HEADER, read_checkers, read_websites
+from wasc.utils import OK, read_checkers, read_websites
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 DEFAULT_CHECKERS = [
@@ -29,11 +28,13 @@ DEFAULT_CHECKERS = [
 @click.option("-f", "--output_format", default = "json",
               type=click.Choice(["json", "csv"], case_sensitive=False),
               help="Output format [default=json]")
+@click.option("-l", "--list_checkers", is_flag=True, default=False,
+              help="List known checkers [default=False]")
 @click.option("-o", "--output", default=sys.stdout,
               type=click.File("w"),
               help="Output file [default=stdout]")
 @click.version_option(version=__version__, prog_name="wasc")
-def wasc(websites, checkers, output, output_format):
+def wasc(websites, checkers, output_format, list_checkers, output):
     """
     Websites Accessibility Criteria Checker,
     helps to evaluate accessibility criteria on a list of websites
@@ -41,6 +42,11 @@ def wasc(websites, checkers, output, output_format):
     WEBSITES is a CSV file containing a list of websites as couples
     "label";"URL"
     """
+    # If list_checkers then list checkers and stops
+    if list_checkers:
+        for checker in checker_factory.available():
+            click.echo(checker)
+        return
     # Reads and creates checker list
     checker_names = DEFAULT_CHECKERS
     if checkers:
@@ -70,7 +76,7 @@ def wasc(websites, checkers, output, output_format):
             bs_obj = None
             error = ""
             if response:
-                if response.status == 200 :
+                if response.status == OK :
                     bs_obj = bs4.BeautifulSoup(response.data, "html.parser")
                 else:
                     error = "HTML Error Status " + str(response.status)
@@ -82,24 +88,6 @@ def wasc(websites, checkers, output, output_format):
                 analysis = [checker.execute(bs_obj, url) if bs_obj else "" for checker in checkers_list]
             results.append(starter + analysis)
             pbar.update(1)
-    # results = []
-    # for i in tqdm(range(len(websites))):
-    #     label, url = websites[i]
-    #     bs_obj = None
-    #     error = ""
-    #     try:
-    #         response = requests.get(url, headers=HEADER, timeout = 1)
-    #         if response.status_code == requests.codes.ok :
-    #             bs_obj = bs4.BeautifulSoup(response.content, "html.parser")
-    #         else:
-    #             error = "HTML Error Status " + str(response.status_code)
-    #     except Exception as e:
-    #         error = str(e)
-    #     starter = [label, url, error]
-    #     analysis = ["échec" for _ in checkers_list]
-    #     if not error:
-    #         analysis = [checker.execute(bs_obj, url) if bs_obj else "" for checker in checkers_list]
-    #     results.append(starter + analysis)
 
     # Creates the DataFrame from results
     df = pd.DataFrame(results, columns=column_names)

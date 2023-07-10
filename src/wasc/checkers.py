@@ -5,10 +5,10 @@
 import re
 
 import bs4
-from trafilatura import fetch_url
+from trafilatura import fetch_url, extract
 
 from wasc.abstract_checker import AbstractChecker
-from wasc.utils import HEADER, check_and_correct_url, find_link
+from wasc.utils import check_and_correct_url, find_link
 
 PRESENT = "présent"
 FAIL = "échec"
@@ -185,17 +185,18 @@ class AccessRateChecker(AbstractChecker) :
         if link_url == FAIL:
             return FAIL
         try:
-            response = fetch_url(link_url, decode=False)
-            if response.status == OK :
-                link_page = bs4.BeautifulSoup(response.data, "html.parser")
+            response = fetch_url(link_url)
+            if response:
+                result = extract(response, output_format="xml", include_links=True)
+                link_page = bs4.BeautifulSoup(result, "html.parser")
                 motif = re.compile(r"%", re.IGNORECASE)
                 percent_tags = link_page.find_all(string = motif)
                 for tag in percent_tags:
                     if "conformité" in tag:
-                        m = re.search(r"\s(100|(\d{1,2}([\.\,]\d+)*))\ *%", str(tag))
+                        m = re.search(r"\s(100|(\d{1,2}([\.\,]\d+)*)) *%", str(tag))
                         if m:
                             return str(m[1]) + "%"
-        except Exception as e:
+        except Exception:
             return FAIL
         return FAIL
 

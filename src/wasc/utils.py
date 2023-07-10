@@ -11,6 +11,7 @@ HEADER = {
         (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36" ,
     "referer" : "https://www.google.com/"
     }
+OK = 200
 
 def read_checkers(filename) :
     """
@@ -77,6 +78,7 @@ def check_and_correct_url(target_url : str, root_url : str) -> str :
         return root_url.split(":")[0] + "://" + target_url
 
     # Else find an overlap
+    i = 1
     for i in range(1, min(len(target_url), len(root_url))):
         if target_url.find(root_url[-i:]) == 0:
             break
