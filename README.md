@@ -11,6 +11,7 @@
   - [](#)
   - [Installation](#installation)
   - [Usage](#usage)
+  - [Documentation](#documentation)
   - [License](#license)
   - [Developpement](#developpement)
     - [Dependencies](#dependencies)
@@ -42,6 +43,10 @@ Options:
 ```
 
 Example files are given in `data` directory
+
+## Documentation
+
+Documentation is available [here](https://atelierpartage.github.io/wasc/)
 ## License
 
 `wasc` is distributed under the terms of the [CECILL-2.1](https://spdx.org/licenses/CECILL-2.1.html) license by the following licensors :
@@ -52,6 +57,7 @@ Example files are given in `data` directory
 `wasc` main contact is [contact@latelierpartage.fr](mailto:contact@latelierpartage.fr)
 
 For details about the license, see file [LICENSE.txt](https://github.com/atelierPartage/wasc/blob/main/LICENSE.txt)
+
 ## Developpement
 
 Full source code is available on github : [https://github.com/gcollet/wasc](https://github.com/gcollet/wasc)
