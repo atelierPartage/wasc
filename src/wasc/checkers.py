@@ -5,13 +5,14 @@
 import re
 
 import bs4
-import requests
+from trafilatura import fetch_url
 
 from wasc.abstract_checker import AbstractChecker
 from wasc.utils import HEADER, check_and_correct_url, find_link
 
 PRESENT = "présent"
 FAIL = "échec"
+OK = 200
 mentions = "non|partiellement|totalement"
 ACCESS_PATTERN = re.compile("Accessibilité[ \xa0]:[ \xa0](" + mentions + ")[ \xa0]conforme", re.IGNORECASE)
 
@@ -183,16 +184,19 @@ class AccessRateChecker(AbstractChecker) :
         link_url = AccessLinkChecker().execute(web_page, root_url)
         if link_url == FAIL:
             return FAIL
-        response = requests.get(link_url, headers=HEADER, timeout = 1)
-        if response.status_code == requests.codes.ok :
-            link_page = bs4.BeautifulSoup(response.content, "html.parser")
-            motif = re.compile(r"%", re.IGNORECASE)
-            percent_tags = link_page.find_all(string = motif)
-            for tag in percent_tags:
-                if "conformité" in tag:
-                    m = re.search(r"\s(100|(\d{1,2}(\.\d+)*))", str(tag))
-                    if m:
-                        return str(m[1]) + "%"
+        try:
+            response = fetch_url(link_url, decode=False)
+            if response.status == OK :
+                link_page = bs4.BeautifulSoup(response.data, "html.parser")
+                motif = re.compile(r"%", re.IGNORECASE)
+                percent_tags = link_page.find_all(string = motif)
+                for tag in percent_tags:
+                    if "conformité" in tag:
+                        m = re.search(r"\s(100|(\d{1,2}([\.\,]\d+)*))\ *%", str(tag))
+                        if m:
+                            return str(m[1]) + "%"
+        except Exception as e:
+            return FAIL
         return FAIL
 
 class LegalChecker(AbstractChecker) :
@@ -234,9 +238,12 @@ class LegalChecker(AbstractChecker) :
             except KeyError :
                 pass
         legal_link = check_and_correct_url("mentions-legales", root_url)
-        response = requests.get(legal_link, headers=HEADER, timeout = 1)
-        if response.status_code == requests.codes.ok :
-            return legal_link
+        try:
+            response = fetch_url(legal_link, decode=False)
+            if response.status == OK :
+                return legal_link
+        except Exception:
+            return FAIL
         return FAIL
 
 class LangChecker(AbstractChecker) :

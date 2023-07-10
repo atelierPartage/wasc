@@ -68,18 +68,24 @@ def check_and_correct_url(target_url : str, root_url : str) -> str :
     target_url = target_url.strip("/")
     root_url = root_url.strip("/")
 
-    # If not truncated
+    # If target startswith "http"
     if target_url.startswith("http") :
         return target_url
 
-    # Else if the root_url end overlap the target_url start
-    target_subpath = target_url.split("/")
-    root_subpath = root_url.split("/")
-    if target_subpath[0] == root_subpath[-1]:
-        return root_url + "/" + "/".join(target_subpath[1:])
+    # If target startswith "www"
+    if target_url.startswith("www") :
+        return root_url.split(":")[0] + "://" + target_url
 
-    # Else concatenate
-    return root_url + "/" + target_url
+    # Else find an overlap
+    for i in range(1, min(len(target_url), len(root_url))):
+        if target_url.find(root_url[-i:]) == 0:
+            break
+    # if no overlap, concatenate
+    if i+1 == min(len(target_url), len(root_url)):
+        return root_url + "/" + target_url
+    # else remove overlapping part and concatenate
+    else:
+        return root_url[:-i] + target_url
 
 def find_link(access_tag, root_url):
     while access_tag and access_tag.name != "a" and access_tag.name != "html":
