@@ -228,7 +228,9 @@ class LegalChecker(AbstractChecker) :
             while legal_tag and legal_tag.name != "a" and legal_tag.name != "html":
                 legal_tag = legal_tag.parent
             try :
-                return check_and_correct_url(legal_tag.attrs["href"], root_url)
+                legal_link = check_and_correct_url(legal_tag.attrs["href"], root_url)
+                if root_url != legal_link:
+                    return check_and_correct_url(legal_tag.attrs["href"], root_url)
             except KeyError :
                 pass
         legal_link = check_and_correct_url("mentions-legales", root_url)
@@ -342,3 +344,27 @@ class FooterChecker(AbstractChecker) :
             return "present" if valid else "échec"
         """
         return PRESENT if len(web_page.find_all(name="footer")) == 1 else FAIL
+
+class ContactLinkChecker(AbstractChecker) :
+    """ContactLinkChecker
+    Check the presence of a unique <footer> tag
+    """
+    def __init__(self) :
+        super().__init__("ContactLinkChecker", "Lien Contact")
+
+    def execute(self, web_page : bs4.BeautifulSoup, root_url : str):
+        """
+        Check the presence of a unique <footer> tag in web_page
+
+        Returns
+        -------
+        str :
+            return "present" if valid else "échec"
+        """
+        link_tags = web_page.find_all(href=re.compile("(contact|ecrire)"))
+        for tag in link_tags:
+            try :
+                return check_and_correct_url(tag.attrs["href"], root_url)
+            except KeyError :
+                pass
+        return FAIL

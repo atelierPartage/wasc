@@ -265,19 +265,26 @@ class TestHeaderChecker:
         assert header_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == dft.PRESENT
 
 class TestFooterChecker:
-    def test_header_checker_init(self):
-        header_checker = dft.FooterChecker()
-        assert header_checker.name == "FooterChecker"
-        assert header_checker.description == "Footer"
+    def test_footer_checker_init(self):
+        footer_checker = dft.FooterChecker()
+        assert footer_checker.name == "FooterChecker"
+        assert footer_checker.description == "Footer"
 
-    def test_header_checker_fail(self):
+    def test_footer_checker_fail(self):
         test_html = "<!DOCTYPE html><html><body></body></html>"
-        header_checker = dft.FooterChecker()
+        footer_checker = dft.FooterChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
-        assert header_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == dft.FAIL
+        assert footer_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == dft.FAIL
 
-    def test_header_checker_present(self):
+    def test_footer_checker_present(self):
         test_html = "<!DOCTYPE html><html><body><footer></footer></body></html>"
-        header_checker = dft.FooterChecker()
+        footer_checker = dft.FooterChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
-        assert header_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == dft.PRESENT
+        assert footer_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == dft.PRESENT
+
+class TestContactLinkChecker:
+    def test_contact_link_checker_init(self):
+        contact_link_checker = dft.ContactLinkChecker()
+        assert contact_link_checker.name == "ContactLinkChecker"
+        assert contact_link_checker.description == "Lien Contact"
+

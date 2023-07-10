@@ -16,7 +16,7 @@ Objects
 -------
 checker_factory
 """
-import wasc.checkers as dft
+import wasc.checkers as chk
 
 
 class CheckerFactory :
@@ -107,11 +107,14 @@ class CheckerFactory :
         return checker_name in self.__checker_dict
 
 checker_factory = CheckerFactory()
-checker_factory.register("HeadNbChecker", dft.HeadNbChecker)
-checker_factory.register("HeadLvlChecker", dft.HeadLvlChecker)
-checker_factory.register("AccessRateChecker", dft.AccessRateChecker)
-checker_factory.register("LangChecker", dft.LangChecker)
-checker_factory.register("DoctypeChecker", dft.DoctypeChecker)
-checker_factory.register("AccessChecker", dft.AccessChecker)
-checker_factory.register("AccessLinkChecker", dft.AccessLinkChecker)
-checker_factory.register("LegalChecker", dft.LegalChecker)
+checker_factory.register("HeadNbChecker", chk.HeadNbChecker)
+checker_factory.register("HeadLvlChecker", chk.HeadLvlChecker)
+checker_factory.register("AccessRateChecker", chk.AccessRateChecker)
+checker_factory.register("LangChecker", chk.LangChecker)
+checker_factory.register("DoctypeChecker", chk.DoctypeChecker)
+checker_factory.register("AccessChecker", chk.AccessChecker)
+checker_factory.register("AccessLinkChecker", chk.AccessLinkChecker)
+checker_factory.register("LegalChecker", chk.LegalChecker)
+checker_factory.register("HeaderChecker", chk.HeaderChecker)
+checker_factory.register("FooterChecker", chk.FooterChecker)
+checker_factory.register("ContactLinkChecker", chk.ContactLinkChecker)

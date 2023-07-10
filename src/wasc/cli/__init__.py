@@ -15,7 +15,11 @@ from wasc.checker_factory import checker_factory
 from wasc.utils import HEADER, read_checkers, read_websites
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
-DEFAULT_CHECKERS = ["AccessChecker", "AccessLinkChecker", "DoctypeChecker", "LangChecker", "LegalChecker"]
+DEFAULT_CHECKERS = [
+    "AccessChecker", "AccessLinkChecker", "AccessRateChecker",
+    "DoctypeChecker", "LangChecker", "LegalChecker",
+    "ContactLinkChecker"
+]
 
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.argument("websites", type=click.Path(exists=True))
