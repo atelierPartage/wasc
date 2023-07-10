@@ -9,6 +9,7 @@ import click
 import pandas as pd
 import requests
 from tqdm import tqdm
+from trafilatura.downloads import add_to_compressed_dict, buffered_downloads, load_download_buffer
 
 from wasc.__about__ import __version__
 from wasc.checker_factory import checker_factory
@@ -54,27 +55,51 @@ def wasc(websites, checkers, output, output_format):
 
     # Reads the list of web sites
     websites = read_websites(websites)
+    websites_dict = dict(zip([ws[1].strip("/") for ws in websites], [ws[0] for ws in websites]))
+    url_list = [ws[1] for ws in websites]
 
     # Launch analysis
     click.echo(f"Analysis of {len(websites)} websites...")
+    threads = 8
+    dl_dict = add_to_compressed_dict(url_list)
+    mybuffer, dl_dict = load_download_buffer(dl_dict)
     results = []
-    for i in tqdm(range(len(websites))):
-        label, url = websites[i]
-        bs_obj = None
-        error = ""
-        try:
-            response = requests.get(url, headers=HEADER, timeout = 1)
-            if response.status_code == requests.codes.ok :
-                bs_obj = bs4.BeautifulSoup(response.content, "html.parser")
+    with tqdm(total=len(url_list)) as pbar:
+        for url, response in buffered_downloads(mybuffer, threads, decode=False):
+            label = websites_dict[url.strip("/")]
+            bs_obj = None
+            error = ""
+            if response:
+                if response.status == 200 :
+                    bs_obj = bs4.BeautifulSoup(response.data, "html.parser")
+                else:
+                    error = "HTML Error Status " + str(response.status)
             else:
-                error = "HTML Error Status " + str(response.status_code)
-        except Exception as e:
-            error = str(e)
-        starter = [label, url, error]
-        analysis = ["échec" for _ in checkers_list]
-        if not error:
-            analysis = [checker.execute(bs_obj, url) if bs_obj else "" for checker in checkers_list]
-        results.append(starter + analysis)
+                error = "Problème lors du téléchargement"
+            starter = [label, url, error]
+            analysis = ["échec" for _ in checkers_list]
+            if not error:
+                analysis = [checker.execute(bs_obj, url) if bs_obj else "" for checker in checkers_list]
+            results.append(starter + analysis)
+            pbar.update(1)
+    # results = []
+    # for i in tqdm(range(len(websites))):
+    #     label, url = websites[i]
+    #     bs_obj = None
+    #     error = ""
+    #     try:
+    #         response = requests.get(url, headers=HEADER, timeout = 1)
+    #         if response.status_code == requests.codes.ok :
+    #             bs_obj = bs4.BeautifulSoup(response.content, "html.parser")
+    #         else:
+    #             error = "HTML Error Status " + str(response.status_code)
+    #     except Exception as e:
+    #         error = str(e)
+    #     starter = [label, url, error]
+    #     analysis = ["échec" for _ in checkers_list]
+    #     if not error:
+    #         analysis = [checker.execute(bs_obj, url) if bs_obj else "" for checker in checkers_list]
+    #     results.append(starter + analysis)
 
     # Creates the DataFrame from results
     df = pd.DataFrame(results, columns=column_names)
