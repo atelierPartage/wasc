@@ -15,6 +15,15 @@ The current and past members of the wasc team.
 
 [@gcollet](https://github.com/gcollet)
 
+## Version 0.4.0 (2023-07-10)
+* Use trafilatura instead of requests to download webpages -> this allows to use simple parallel downloads
+* Moreover, trafilatura extract text and will be usefull for text searching
+* New checkers: 
+    * HeaderChecker: detects <header> tag
+    * FooterChecker: detects <footer> tag
+    * AccessRateChecker: finds the accessibility rate in accessibility statement
+    * ContactLinkChecker: finds a contact link in the page (with keywords "contact" and "ecrire")
+* Bugfix: Correction of url concatenation when sub path is given in href
 ## Version 0.3.0 (2023-07-05)
 * Major code simplication by removing two classes Criterion and Report that are useless
 * The main function only store results in lists that are used to initiate a DataFrame
