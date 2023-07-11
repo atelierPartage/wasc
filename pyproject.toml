@@ -59,6 +59,7 @@ WASC_CRITERIA_DEFAULT_PATH = "./data/default_criteria.yml"
 WACS_CRITERIA_DEFAULT_PATH = "./data/default_criteria.yml"
 
 [tool.hatch.envs.default.scripts]
+profile = "python -m cProfile -s cumtime src/wasc/__main__.py {args:tests}"
 test = "pytest -v {args:tests}"
 test-cov = "coverage run -m pytest {args:tests}"
 lcov = "coverage lcov"
