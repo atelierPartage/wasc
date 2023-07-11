@@ -12,7 +12,7 @@ from trafilatura.downloads import add_to_compressed_dict, buffered_downloads, lo
 
 from wasc.__about__ import __version__
 from wasc.checker_factory import checker_factory
-from wasc.utils import OK, FAIL, read_checkers, read_websites
+from wasc.utils import FAIL, OK, read_checkers, read_websites
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 DEFAULT_CHECKERS = [
@@ -83,9 +83,7 @@ def wasc(websites, checkers, output_format, list_checkers, output):
             else:
                 error = "Problème lors du téléchargement"
             starter = [label, url, error]
-            analysis = ["échec" for _ in checkers_list]
-            if not error:
-                analysis = [checker.execute(bs_obj, url) if bs_obj else "" for checker in checkers_list]
+            analysis = [checker.execute(bs_obj, url) if bs_obj else FAIL for checker in checkers_list]
             results.append(starter + analysis)
             pbar.update(1)
 

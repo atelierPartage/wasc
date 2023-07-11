@@ -20,16 +20,6 @@ PRESENT = "présent"
 def read_checkers(filename) :
     """
     Reads the list of checkers.
-
-    Parameters
-    ----------
-    filename : str
-        File name containing list of checkers
-
-    Returns
-    -------
-    : list
-        A list of checker names
     """
     with open(filename, encoding = "utf-8") as config_file :
         return [line.strip() for line in config_file]
@@ -53,6 +43,10 @@ def check_and_correct_url(target_url : str, root_url : str) -> str :
     return str(urljoin(base_url, target_url.strip(" /")))
 
 def find_link(access_tag, root_url):
+    """
+    Not used anymore but keep it, it may be useful
+    get up until on a link tag -> then check href content
+    """
     while access_tag and access_tag.name != "a" and access_tag.name != "html":
         access_tag = access_tag.parent
     try :

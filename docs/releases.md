@@ -7,7 +7,7 @@ You can determine your currently installed version using:
 
 ```bash
 $ wasc --version
-wasc, version 0.3.0
+wasc, version 1.0.0
 ```
 
 ## Maintenance team
@@ -15,6 +15,12 @@ The current and past members of the wasc team.
 
 [@gcollet](https://github.com/gcollet)
 
+## Version 1.0.0 (2023-07-12)
+* 11 checkers available (docs are updated)
+* Use trafilatura parallel download of webpages
+* Better accessibility link and rate detection
+* Bugfix: Better URL management with urllib.urljoin
+* Bugfix: Use trafilatura extract feature for accessibility rate detection
 ## Version 0.4.0 (2023-07-10)
 * Use trafilatura instead of requests to download webpages -> this allows to use simple parallel downloads
 * Moreover, trafilatura extract text and will be usefull for text searching

@@ -11,56 +11,57 @@ pip install wasc
 
 ## Running an analysis
 
-Getting started is super from example files in directory `data`.
+Getting started is super easy from example files in directory `data`.
 You may try `wasc data/example_websites.csv` as follows:
 
 ```bash
-$ wasc data/example_websites.csv
-Use default criteria
+$ wasc data/example_websites.csv                                                  
+Use default checkers
 Analysis of 2 websites...
-100%|█████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:00<00:00,  3.98it/s]
+100%|███████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:00<00:00,  2.33it/s]
 Results:
 {
     "Design Gouv": {
-        "Accessibilité": {
-            "Lien accessibilité": "https://design.numerique.gouv.fr/misc/accessibilite",
-            "Mention accessibilité": "totalement conforme"
-        },
-        "Mentions légales": {
-            "Mentions légales": "https://design.numerique.gouv.fr/misc/mentions-legales"
-        }
+        "Doctype": "html",
+        "Erreur": "",
+        "Lang": "fr",
+        "Lien Contact": "https://design.numerique.gouv.fr/contact",
+        "Lien accessibilité": "https://design.numerique.gouv.fr/misc/accessibilite",
+        "Mention accessibilité": "totalement conforme",
+        "Mentions légales": "https://design.numerique.gouv.fr/misc/mentions-legales",
+        "Taux d'accessibilité": "100%",
+        "URL": "https://design.numerique.gouv.fr/"
     },
     "Example": {
-        "Accessibilité": {
-            "Lien accessibilité": "échec",
-            "Mention accessibilité": "échec"
-        },
-        "Mentions légales": {
-            "Mentions légales": "échec"
-        }
+        "Doctype": "html",
+        "Erreur": "",
+        "Lang": "échec",
+        "Lien Contact": "échec",
+        "Lien accessibilité": "échec",
+        "Mention accessibilité": "échec",
+        "Mentions légales": "échec",
+        "Taux d'accessibilité": "échec",
+        "URL": "http://example.com/"
     }
 }
 Completed
 ```
 
-As you can see:
+The output always contains `Organisation`, `Erreur` and `URL`.
 
-* default criteria are "Accessibilité" and "Mentions légales"
-* default output format is `json`.
-
-## Change format
+## Change output format
 
 You can choose to print results in csv using `-f csv` option:
 
 ```bash
 $ wasc data/example_websites.csv -f csv
-Use default criteria
+Use default checkers
 Analysis of 2 websites...
-100%|█████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:00<00:00,  3.63it/s]
+100%|███████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:00<00:00,  3.00it/s]
 Results:
-Organisation;Mention accessibilité;Lien accessibilité;Mentions légales
-Design Gouv;totalement conforme;https://design.numerique.gouv.fr/misc/accessibilite;https://design.numerique.gouv.fr/misc/mentions-legales
-Example;échec;échec;échec
+Organisation;URL;Erreur;Mention accessibilité;Lien accessibilité;Taux d'accessibilité;Doctype;Lang;Mentions légales;Lien Contact
+Design Gouv;https://design.numerique.gouv.fr/;;totalement conforme;https://design.numerique.gouv.fr/misc/accessibilite;100%;html;fr;https://design.numerique.gouv.fr/misc/mentions-legales;https://design.numerique.gouv.fr/contact
+Example;http://example.com/;;échec;échec;échec;html;échec;échec;échec
 
 Completed
 ```
@@ -71,26 +72,67 @@ You may specify the output file using `-o out.json` option:
 
 ```bash
 $ wasc data/example_websites.csv -o out.json
-Use default criteria
+Use default checkers
 Analysis of 2 websites...
-100%|█████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:00<00:00,  2.75it/s]
+100%|███████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:00<00:00,  4.30it/s]
 Save results in out.json
 Completed
 ```
 
-## Change criteria
+## List checkers
 
-Wasc criteria are defined in a YAML formatted file.
-An example is given in `data/criteria.yml`.
+The option `-l` gives the list of checkers that are known by Wasc.
 
-In the YAML file, a criterion may contain many checkers as follows:
-```yaml
-Accessibilité :
-  - AccessChecker
-  - AccessLinkChecker
-  - AccessRateChecker
+```bash
+$ wasc data/example_websites.csv -l         
+AccessChecker
+AccessLinkChecker
+AccessRateChecker
+ContactLinkChecker
+DoctypeChecker
+FooterChecker
+HeaderChecker
+HeadLvlChecker
+HeadNbChecker
+LangChecker
+LegalChecker
+```
+The list of available checkers is also given in page [Checkers](checkers.md) with their description.
+## Change checkers
+
+To use your list of checkers, simply put the list in a file and give it through option `-c`.
+An example is given in `data/checkers.csv`.
+
+In the CSV file, checkers are simply listed on a single column without header
+```
+AccessChecker
+AccessLinkChecker
+AccessRateChecker
 ```
 
-The criterion name is "Accessibilité" and it is composed of 3 checkers.
+Example of `-c` option:
 
-The list of checkers is given in page [Checkers]()
+```bash
+$ wasc data/example_websites.csv -c data/checkers.csv 
+Read checkers from data/checkers.csv
+Analysis of 2 websites...
+100%|███████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:00<00:00,  5.45it/s]
+Results:
+{
+    "Design Gouv": {
+        "Erreur": "",
+        "Lien accessibilité": "https://design.numerique.gouv.fr/misc/accessibilite",
+        "Mention accessibilité": "totalement conforme",
+        "Taux d'accessibilité": "100%",
+        "URL": "https://design.numerique.gouv.fr/"
+    },
+    "Example": {
+        "Erreur": "",
+        "Lien accessibilité": "échec",
+        "Mention accessibilité": "échec",
+        "Taux d'accessibilité": "échec",
+        "URL": "http://example.com/"
+    }
+}
+Completed
+```

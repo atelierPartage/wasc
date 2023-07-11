@@ -72,15 +72,24 @@ class AccessLinkChecker(AbstractChecker) :
         # 1 - Try to find link in Mention Accessibilité
         access_tag = web_page.find("a", string=ACCESS_PATTERN)
         if access_tag :
-            return check_and_correct_url(access_tag.attrs["href"], root_url)
+            try:
+                return check_and_correct_url(access_tag.attrs["href"], root_url)
+            except Exception:
+                return FAIL
         # 2 - Try to find text "accessibilité" in a link
         access_tag = web_page.find("a", string=re.compile("accessibilit", re.IGNORECASE))
         if access_tag :
-            return check_and_correct_url(access_tag.attrs["href"], root_url)
+            try:
+                return check_and_correct_url(access_tag.attrs["href"], root_url)
+            except Exception:
+                return FAIL
         # 3 - Try to find a link that contains accessibilit in href
         link_tag = web_page.find("a", href=re.compile("accessibilit", re.IGNORECASE))
         if link_tag:
-            return check_and_correct_url(link_tag.attrs["href"], root_url)
+            try:
+                return check_and_correct_url(link_tag.attrs["href"], root_url)
+            except Exception:
+                return FAIL
         return FAIL
 
     def execute(self, web_page : bs4.BeautifulSoup, root_url : str):
