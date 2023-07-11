@@ -82,13 +82,11 @@ def wasc(websites, checkers, output_format, list_checkers, output):
                     error = "HTML Error Status " + str(response.status)
             else:
                 error = "Problème lors du téléchargement"
-            analysis = {"Organisation": label, "URL": url, "Erreur": error}
-            for checker in checkers_list:
-                analysis[checker.description] = checker.execute(bs_obj, url) if bs_obj else FAIL
-            list_of_results = [analysis["Organisation"], analysis["URL"],analysis["Erreur"]]
-            for checker in checkers_list:
-                list_of_results.append(analysis[checker.description])
-            results.append(list_of_results)
+            starter = [label, url, error]
+            analysis = ["échec" for _ in checkers_list]
+            if not error:
+                analysis = [checker.execute(bs_obj, url) if bs_obj else "" for checker in checkers_list]
+            results.append(starter + analysis)
             pbar.update(1)
 
     # Creates the DataFrame from results
