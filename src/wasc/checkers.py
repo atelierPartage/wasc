@@ -8,7 +8,7 @@ import bs4
 from trafilatura import extract, fetch_url
 
 from wasc.abstract_checker import AbstractChecker
-from wasc.utils import check_and_correct_url, find_link
+from wasc.utils import check_and_correct_url
 
 PRESENT = "présent"
 FAIL = "échec"
@@ -19,38 +19,11 @@ ACCESS_PATTERN = re.compile("Accessibilité[ \xa0]:[ \xa0](" + mentions + ")[ \x
 class HeadNbChecker(AbstractChecker) :
     """HeadNbChecker
     A class to test the number of <head> tags in a page.
-
-    Attributes
-    ----------
-    name : str
-        The name of the checker, i.e. a small identifier used in config files
-    description : str
-        The description of the checker, used in output
-
-    Methods
-    -------
-    execute(self, web_page, url) -> dict :
-        return the number of <head> tags (expected 1)
     """
     def __init__(self) :
         super().__init__("HeadNbChecker", "Nombre de <head>")
 
     def execute(self, web_page : bs4.BeautifulSoup, root_url : str):  # noqa: ARG002
-        """
-        Gets the number of <head> tags in the web page
-
-        Parameters
-        ----------
-        web_page : bs4.BeautifulSoup
-            The BeautifulSoup object created from url
-        root_url : str
-            The root URL of the analyzed web page (NOT USED HERE)
-
-        Returns
-        -------
-         : int
-            The number of <head> tags
-        """
         return len(web_page.find_all(name="head"))
 
 class HeadLvlChecker(AbstractChecker) :
@@ -61,54 +34,24 @@ class HeadLvlChecker(AbstractChecker) :
         super().__init__("HeadLvlChecker", "Profondeurs des <head>")
 
     def execute(self, web_page : bs4.BeautifulSoup, root_url : str):  # noqa: ARG002
-        """
-        Returns the depth of <head> tags of the web page
-
-        Parameters
-        ----------
-        web_page : bs4.BeautifulSoup
-            The BeautifulSoup object created from url
-        root_url : str
-            The root URL of the analyzed web page
-
-        Returns
-        -------
-         : list
-            The list of depth of head tags
-        """
         head_tag = web_page.find_all("head")
         return [len(list(tag.parents)) - 1 for tag in head_tag] if head_tag else []
 
 class AccessChecker(AbstractChecker) :
     """AccessChecker
     Check the presence of "Accessibilité" RGAA4 mention on the web page.
+        1 - Search in <footer>
+        2 - Search in <div id="footer">
+        3 - Search in the whole page
     """
     def __init__(self) :
         super().__init__("AccessChecker", "Mention accessibilité")
 
     def execute(self, web_page : bs4.BeautifulSoup, root_url : str):  # noqa: ARG002
-        """
-        If there is a mention "Accessibilité", returns the level of accessibility,
-        else "non conforme"
-
-        Parameters
-        ----------
-        web_page : bs4.BeautifulSoup
-            The BeautifulSoup object created from url
-        root_url : str
-            The root URL of the analyzed web page
-
-        Returns
-        -------
-        str :
-            The level of accessibility or "non conforme"
-        """
         mention = ""
-        # 1 - Search in <footer>
         footer = web_page.footer
         if footer:
             mention = footer.find_all(string = ACCESS_PATTERN)
-        # 2 - Search in id="footer" tag
         else:
             footer = web_page.find(id="footer")
             if footer:
@@ -120,6 +63,10 @@ class AccessChecker(AbstractChecker) :
 class AccessLinkChecker(AbstractChecker) :
     """AccessLinkChecker
     Check if a link ot an accessibility statement exists
+    Search for a link as defined in search_link
+        1 - in <footer>
+        2 - in <div id="footer">
+        3 - in the whole page
     """
     def __init__(self) :
         super().__init__("AccessLinkChecker", "Lien accessibilité")
@@ -129,36 +76,17 @@ class AccessLinkChecker(AbstractChecker) :
         access_tag = web_page.find("a", string=ACCESS_PATTERN)
         if access_tag :
             return check_and_correct_url(access_tag.attrs["href"], root_url)
-        # 2 - Find text "accessibilité" in a link
+        # 2 - Try to find text "accessibilité" in a link
         access_tag = web_page.find("a", string=re.compile("accessibilit", re.IGNORECASE))
         if access_tag :
             return check_and_correct_url(access_tag.attrs["href"], root_url)
-        # 3 - Check if there exists a link that contains accessibilit in href
+        # 3 - Try to find a link that contains accessibilit in href
         link_tag = web_page.find("a", href=re.compile("accessibilit", re.IGNORECASE))
         if link_tag:
             return check_and_correct_url(link_tag.attrs["href"], root_url)
         return FAIL
 
     def execute(self, web_page : bs4.BeautifulSoup, root_url : str):
-        """
-        Search for a link to the accessibility page, either :
-        * if the mention "Accessibilité" is a link
-        * if there exists a link to root_url/accessibilite
-
-        Parameters
-        ----------
-        web_page : bs4.BeautifulSoup
-            The BeautifulSoup object created from url
-        root_url : str
-            The root URL of the analyzed web page
-
-        Returns
-        -------
-        dict :
-            The name of the checker is the key and the value is either False if the mention
-            "Accessibilité" / "Accessibility" is not a link, or it returns the URL of the link (str)
-        """
-        # 1- Check the link in the mention
         footer = web_page.footer
         if footer:
             result = self.search_link(footer, root_url)
@@ -173,28 +101,12 @@ class AccessLinkChecker(AbstractChecker) :
 
 class AccessRateChecker(AbstractChecker) :
     """AccessRateChecker
-    Get compliance rate (%) on the accessibility statement (if it exists)
+    Returns the compliance rate (%) on the accessibility statement if found
     """
     def __init__(self) :
         super().__init__("AccessRateChecker", "Taux d'accessibilité")
 
     def execute(self, web_page : bs4.BeautifulSoup, root_url : str):
-        """
-        This method performs the test on the beautifulsoup object passed in parameter and determines
-        if there is a compliance rate (%) on the accessibility statement web page or not
-
-        Parameters
-        ----------
-        web_page : bs4.BeautifulSoup
-            The BeautifulSoup object created from url
-        root_url : str
-            The root URL of the analyzed web page
-
-        Returns
-        -------
-        str :
-            the compliance rate (%), or "échec" if not found
-        """
         link_url = AccessLinkChecker().execute(web_page, root_url)
         if link_url == FAIL:
             return FAIL
@@ -217,29 +129,15 @@ class AccessRateChecker(AbstractChecker) :
 class LegalChecker(AbstractChecker) :
     """LegalChecker
     Test the presence of "Mentions légales" link on the web page.
+    Try to find :
+        * text "Mentions légales" (case insensitive) and check if a link exists
+        * try the url root_url + "/mentions-legales" and check if a link exists
+    Return the link to "Mentions légales" page if it exists, else fail
     """
     def __init__(self) :
         super().__init__("LegalChecker", "Mentions légales")
 
     def execute(self, web_page : bs4.BeautifulSoup, root_url : str):
-        """
-        Try to find :
-        * text "Mentions légales" (case insensitive) and check if a link exists
-        * try the url root_url + "/mentions-legales" and check if a link exists
-        Return the link to "Mentions légales" page if it exists, else fail
-
-        Parameters
-        ----------
-        web_page : bs4.BeautifulSoup
-            The BeautifulSoup object created from url
-        root_url : str
-            The root URL of the analyzed web page
-
-        Returns
-        -------
-        str :
-            The link to "Mentions légales" page if it exists, else fail
-        """
         motif = re.compile("Mentions* l[eé]gales*", re.IGNORECASE)
         legal_tags = web_page.find_all(string = motif)
         for tag in legal_tags:
@@ -268,22 +166,6 @@ class LangChecker(AbstractChecker) :
         super().__init__("LangChecker", "Lang")
 
     def execute(self, web_page : bs4.BeautifulSoup, root_url : str):  # noqa: ARG002
-        """
-        If the language is specified in the html tag, returns a string
-        corresponding to the language of the web page, else "non conforme"
-
-        Parameters
-        ----------
-        web_page : bs4.BeautifulSoup
-            The BeautifulSoup object created url
-        root_url : str
-            The root URL of the analyzed web page
-
-        Returns
-        -------
-        str :
-            the string of language or "non conforme"
-        """
         try :
             if isinstance(web_page.html, bs4.Tag):
                 return web_page.html.attrs["lang"]
@@ -298,21 +180,6 @@ class DoctypeChecker(AbstractChecker) :
         super().__init__("DoctypeChecker", "Doctype")
 
     def execute(self, web_page : bs4.BeautifulSoup, root_url : str):  # noqa: ARG002
-        """
-        Check the presence of doctype in html document
-
-        Parameters
-        ----------
-        web_page : bs4.BeautifulSoup
-            The BeautifulSoup object created url
-        root_url : str
-            The root URL of the analyzed web page
-
-        Returns
-        -------
-        str :
-            return "html" if valid else "échec"
-        """
         current_pos = 0
         doctype_pos = 1
         html_pos = 0
@@ -338,14 +205,6 @@ class HeaderChecker(AbstractChecker) :
         super().__init__("HeaderChecker", "Header")
 
     def execute(self, web_page : bs4.BeautifulSoup, root_url : str):  # noqa: ARG002
-        """
-        Check the presence of a unique <header> tag in web_page
-
-        Returns
-        -------
-        str :
-            return "present" if valid else "échec"
-        """
         return PRESENT if len(web_page.find_all(name="header")) == 1 else FAIL
 
 class FooterChecker(AbstractChecker) :
@@ -356,32 +215,16 @@ class FooterChecker(AbstractChecker) :
         super().__init__("FooterChecker", "Footer")
 
     def execute(self, web_page : bs4.BeautifulSoup, root_url : str):  # noqa: ARG002
-        """
-        Check the presence of a unique <footer> tag in web_page
-
-        Returns
-        -------
-        str :
-            return "present" if valid else "échec"
-        """
         return PRESENT if len(web_page.find_all(name="footer")) == 1 else FAIL
 
 class ContactLinkChecker(AbstractChecker) :
     """ContactLinkChecker
-    Check the presence of a unique <footer> tag
+    Check the presence of contact link in the page
     """
     def __init__(self) :
         super().__init__("ContactLinkChecker", "Lien Contact")
 
     def execute(self, web_page : bs4.BeautifulSoup, root_url : str):
-        """
-        Check the presence of a unique <footer> tag in web_page
-
-        Returns
-        -------
-        str :
-            return "present" if valid else "échec"
-        """
         link_tags = web_page.find_all(href=re.compile("(contact|ecrire)"))
         for tag in link_tags:
             try :
