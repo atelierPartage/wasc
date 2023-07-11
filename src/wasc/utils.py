@@ -4,6 +4,8 @@
 """
 This module provides some reading functions
 """
+from urllib.parse import urljoin
+
 import pandas as pd
 
 HEADER = {
@@ -33,16 +35,6 @@ def read_checkers(filename) :
 def read_websites(filename) :
     """
     Reads the websites list, each website is a couple (label, URL)
-
-    Parameters
-    ----------
-    filename : File
-        File containing websites list in CSV format
-
-    Returns
-    -------
-     : list
-        A list of of (websites, url)
     """
     df = pd.read_csv(filename, sep=";", comment="#", header = None, names=["org", "url"], skipinitialspace=True)
     return list(zip(df.org, df.url))
@@ -51,43 +43,8 @@ def check_and_correct_url(target_url : str, root_url : str) -> str :
     """
     This method check if the target_url is truncated and, if so,
     recompose from the root_url
-
-    Parameters
-    ----------
-    target_url : str
-        URL of a page in a website, may be truncated
-    root_url : str
-        The root URL of the current website
-
-    Returns
-    -------
-    access_url : str
-        The URL of the desired web page
     """
-
-    # remove trailing backslash
-    target_url = target_url.strip("/")
-    root_url = root_url.strip("/")
-
-    # If target startswith "http"
-    if target_url.startswith("http") :
-        return target_url
-
-    # If target startswith "www"
-    if target_url.startswith("www") :
-        return root_url.split(":")[0] + "://" + target_url
-
-    # Else find an overlap
-    i = 1
-    for i in range(1, min(len(target_url), len(root_url))):
-        if target_url.find(root_url[-i:]) == 0:
-            break
-    # if no overlap, concatenate
-    if i+1 == min(len(target_url), len(root_url)):
-        return root_url + "/" + target_url
-    # else remove overlapping part and concatenate
-    else:
-        return root_url[:-i] + target_url
+    return str(urljoin(root_url.strip("/"), target_url.strip("/")))
 
 def find_link(access_tag, root_url):
     while access_tag and access_tag.name != "a" and access_tag.name != "html":
