@@ -8,11 +8,8 @@ import bs4
 from trafilatura import extract, fetch_url
 
 from wasc.abstract_checker import AbstractChecker
-from wasc.utils import check_and_correct_url
+from wasc.utils import FAIL, OK, PRESENT, check_and_correct_url
 
-PRESENT = "présent"
-FAIL = "échec"
-OK = 200
 mentions = "non|partiellement|totalement"
 ACCESS_PATTERN = re.compile("Accessibilité[ \xa0]:[ \xa0](" + mentions + ")[ \xa0]conforme", re.IGNORECASE)
 

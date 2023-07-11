@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: CECILL-2.1
 import wasc.checker_factory as fact
 
-FAIL = "échec"
+
 class TmpChecker:
     pass
 

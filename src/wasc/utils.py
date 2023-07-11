@@ -14,6 +14,8 @@ HEADER = {
     "referer" : "https://www.google.com/"
     }
 OK = 200
+FAIL = "échec"
+PRESENT = "présent"
 
 def read_checkers(filename) :
     """

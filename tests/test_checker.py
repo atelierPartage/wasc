@@ -4,6 +4,7 @@
 from bs4 import BeautifulSoup
 
 import wasc.checkers as dft
+from wasc.utils import FAIL, PRESENT
 
 BS_PARSER = "html.parser"
 
@@ -29,13 +30,13 @@ class TestDoctypeChecker:
         test_html = "<!DOCTYPE notvalid><html></html>"
         doctype_checker = dft.DoctypeChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
-        assert doctype_checker.execute(basic_webpage, "") == dft.FAIL
+        assert doctype_checker.execute(basic_webpage, "") == FAIL
 
     def test_doctype_checker_no_doctype(self):
         test_html = "<html></html>"
         doctype_checker = dft.DoctypeChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
-        assert doctype_checker.execute(basic_webpage, "") == dft.FAIL
+        assert doctype_checker.execute(basic_webpage, "") == FAIL
 
 class TestLangChecker:
     def test_lang_checker_init(self):
@@ -53,7 +54,7 @@ class TestLangChecker:
         test_html = "<!DOCTYPE html><html></html>"
         lang_checker = dft.LangChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
-        assert lang_checker.execute(basic_webpage, "") == dft.FAIL
+        assert lang_checker.execute(basic_webpage, "") == FAIL
 
 class TestAccessChecker:
     def test_access_checker_init(self):
@@ -65,13 +66,13 @@ class TestAccessChecker:
         test_html = DEFAULT_HTML_HEAD + DEFAULT_HTML_TAIL
         access_checker = dft.AccessChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
-        assert access_checker.execute(basic_webpage, "") == dft.FAIL
+        assert access_checker.execute(basic_webpage, "") == FAIL
 
     def test_access_checker_fail2(self):
         test_html = DEFAULT_HTML_HEAD + "Accessibilité : conforme partiellement" + DEFAULT_HTML_TAIL
         access_checker = dft.AccessChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
-        assert access_checker.execute(basic_webpage, "") == dft.FAIL
+        assert access_checker.execute(basic_webpage, "") == FAIL
 
     def test_access_checker_valid_non(self):
         test_html = DEFAULT_HTML_HEAD + "Accessibilité : non conforme" + DEFAULT_HTML_TAIL
@@ -109,7 +110,7 @@ class TestAccessLinkChecker:
         test_html = DEFAULT_HTML_HEAD + "Accessibilité : totalement conforme" + DEFAULT_HTML_TAIL
         access_link_checker = dft.AccessLinkChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
-        assert access_link_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == dft.FAIL
+        assert access_link_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == FAIL
 
     def test_access_link_checker_valid_other(self):
         test_html = DEFAULT_HTML_HEAD + '<a href="/accessibilite/">Accessibilité</a>' + DEFAULT_HTML_TAIL
@@ -128,7 +129,7 @@ class TestAccessLinkChecker:
         test_html = DEFAULT_HTML_HEAD + "<a>Accessibilité</a>" + DEFAULT_HTML_TAIL
         access_link_checker = dft.AccessLinkChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
-        assert access_link_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == dft.FAIL
+        assert access_link_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == FAIL
 
     def test_access_link_checker_decla(self):
         test_link = '<a href="/misc/accessibilite/">Déclaration d\'accessibilité</a>'
@@ -158,14 +159,14 @@ class TestAccessRateChecker:
         test_html = DEFAULT_HTML_HEAD + "Accessibilité : non conforme" + DEFAULT_HTML_TAIL
         access_rate_checker = dft.AccessRateChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
-        assert access_rate_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == dft.FAIL
+        assert access_rate_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == FAIL
 
     def test_access_rate_checker_fail_link2(self):
         test_link = '<a href="/misc/accessibilite/">Accessibilité : totalement conforme</a>'
         test_html = DEFAULT_HTML_HEAD + test_link + DEFAULT_HTML_TAIL
         access_rate_checker = dft.AccessRateChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
-        assert access_rate_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == dft.FAIL
+        assert access_rate_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == FAIL
 
 class TestLegalChecker:
     def test_mention_legales_checker_init(self):
@@ -191,7 +192,7 @@ class TestLegalChecker:
         test_html = DEFAULT_HTML_HEAD + "Mentions légales" + DEFAULT_HTML_TAIL
         mention_legales_checker = dft.LegalChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
-        assert mention_legales_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == dft.FAIL
+        assert mention_legales_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == FAIL
 
     def test_mention_legales_valid_dftlink(self):
         test_html = DEFAULT_HTML_HEAD + "foo" + DEFAULT_HTML_TAIL
@@ -258,13 +259,13 @@ class TestHeaderChecker:
         test_html = HTML_BODY_ONLY
         header_checker = dft.HeaderChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
-        assert header_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == dft.FAIL
+        assert header_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == FAIL
 
     def test_header_checker_present(self):
         test_html = "<!DOCTYPE html><html><body><header></header></body></html>"
         header_checker = dft.HeaderChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
-        assert header_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == dft.PRESENT
+        assert header_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == PRESENT
 
 class TestFooterChecker:
     def test_footer_checker_init(self):
@@ -276,13 +277,13 @@ class TestFooterChecker:
         test_html = HTML_BODY_ONLY
         footer_checker = dft.FooterChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
-        assert footer_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == dft.FAIL
+        assert footer_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == FAIL
 
     def test_footer_checker_present(self):
         test_html = "<!DOCTYPE html><html><body><footer></footer></body></html>"
         footer_checker = dft.FooterChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
-        assert footer_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == dft.PRESENT
+        assert footer_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == PRESENT
 
 class TestContactLinkChecker:
     def test_contact_link_checker_init(self):
@@ -303,11 +304,11 @@ class TestContactLinkChecker:
         test_html = DEFAULT_HTML_HEAD + test_link + DEFAULT_HTML_TAIL
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
         contact_link_checker = dft.ContactLinkChecker()
-        assert contact_link_checker.execute(basic_webpage, DESIGN_NUM) == dft.FAIL
+        assert contact_link_checker.execute(basic_webpage, DESIGN_NUM) == FAIL
 
     def test_contact_link_checker_bad_link(self):
         test_link = '<a href="/foo">Nous contacter</a>'
         test_html = DEFAULT_HTML_HEAD + test_link + DEFAULT_HTML_TAIL
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
         contact_link_checker = dft.ContactLinkChecker()
-        assert contact_link_checker.execute(basic_webpage, DESIGN_NUM) == dft.FAIL
+        assert contact_link_checker.execute(basic_webpage, DESIGN_NUM) == FAIL
