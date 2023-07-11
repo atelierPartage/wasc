@@ -5,7 +5,7 @@
 import re
 
 import bs4
-from trafilatura import fetch_url, extract
+from trafilatura import extract, fetch_url
 
 from wasc.abstract_checker import AbstractChecker
 from wasc.utils import check_and_correct_url, find_link
@@ -187,7 +187,7 @@ class AccessRateChecker(AbstractChecker) :
         try:
             response = fetch_url(link_url)
             if response:
-                result = extract(response, output_format="xml", include_links=True)
+                result = extract(response, output_format="xml", include_links=True, no_fallback=True)
                 link_page = bs4.BeautifulSoup(result, "html.parser")
                 motif = re.compile(r"%", re.IGNORECASE)
                 percent_tags = link_page.find_all(string = motif)
@@ -241,7 +241,7 @@ class LegalChecker(AbstractChecker) :
         legal_link = check_and_correct_url("mentions-legales", root_url)
         try:
             response = fetch_url(legal_link, decode=False)
-            if response.status == OK :
+            if response and response.status == OK :
                 return legal_link
         except Exception:
             return FAIL

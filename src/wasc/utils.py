@@ -4,7 +4,7 @@
 """
 This module provides some reading functions
 """
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 
 import pandas as pd
 
@@ -44,7 +44,11 @@ def check_and_correct_url(target_url : str, root_url : str) -> str :
     This method check if the target_url is truncated and, if so,
     recompose from the root_url
     """
-    return str(urljoin(root_url.strip("/"), target_url.strip("/")))
+    root = urlparse(root_url)
+    base_url = ""
+    if root.scheme and root.hostname:
+        base_url = root.scheme + "://" + root.hostname
+    return str(urljoin(base_url, target_url.strip("/")))
 
 def find_link(access_tag, root_url):
     while access_tag and access_tag.name != "a" and access_tag.name != "html":

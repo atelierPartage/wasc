@@ -10,6 +10,8 @@ BS_PARSER = "html.parser"
 DEFAULT_HTML_HEAD = "<!DOCTYPE html><html><head></head><body><div>"
 DEFAULT_HTML_TAIL = "</div></body></html>"
 DEFAULT_HTML_ROOT = "https://www.example.com"
+DESIGN_NUM = "https://design.numerique.gouv.fr"
+HTML_BODY_ONLY = "<!DOCTYPE html><html><body></body></html>"
 
 class TestDoctypeChecker:
     def test_doctype_checker_init(self):
@@ -150,7 +152,7 @@ class TestAccessRateChecker:
         test_html = DEFAULT_HTML_HEAD + test_link + DEFAULT_HTML_TAIL
         access_rate_checker = dft.AccessRateChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
-        assert access_rate_checker.execute(basic_webpage, "https://design.numerique.gouv.fr") == "100%"
+        assert access_rate_checker.execute(basic_webpage, DESIGN_NUM) == "100%"
 
     def test_access_rate_checker_fail_link(self):
         test_html = DEFAULT_HTML_HEAD + "Accessibilité : non conforme" + DEFAULT_HTML_TAIL
@@ -216,7 +218,7 @@ class TestHeadNbChecker:
         answer = 2
         assert head_nb_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == answer
     def test_head_nb_fail(self):
-        test_html = "<!DOCTYPE html><html><body></body></html>"
+        test_html = HTML_BODY_ONLY
         head_nb_checker = dft.HeadNbChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
         answer = 0
@@ -240,7 +242,7 @@ class TestHeadLvlChecker:
         answer = [1,3]
         assert head_lvl_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == answer
     def test_head_lvl_fail(self):
-        test_html = "<!DOCTYPE html><html><body></body></html>"
+        test_html = HTML_BODY_ONLY
         head_lvl_checker = dft.HeadLvlChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
         answer = []
@@ -253,7 +255,7 @@ class TestHeaderChecker:
         assert header_checker.description == "Header"
 
     def test_header_checker_fail(self):
-        test_html = "<!DOCTYPE html><html><body></body></html>"
+        test_html = HTML_BODY_ONLY
         header_checker = dft.HeaderChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
         assert header_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == dft.FAIL
@@ -271,7 +273,7 @@ class TestFooterChecker:
         assert footer_checker.description == "Footer"
 
     def test_footer_checker_fail(self):
-        test_html = "<!DOCTYPE html><html><body></body></html>"
+        test_html = HTML_BODY_ONLY
         footer_checker = dft.FooterChecker()
         basic_webpage = BeautifulSoup(test_html, BS_PARSER)
         assert footer_checker.execute(basic_webpage, DEFAULT_HTML_ROOT) == dft.FAIL
@@ -288,3 +290,24 @@ class TestContactLinkChecker:
         assert contact_link_checker.name == "ContactLinkChecker"
         assert contact_link_checker.description == "Lien Contact"
 
+    def test_contact_link_checker_valid(self):
+        test_link = '<a href="/contact">Nous contacter</a>'
+        test_html = DEFAULT_HTML_HEAD + test_link + DEFAULT_HTML_TAIL
+        basic_webpage = BeautifulSoup(test_html, BS_PARSER)
+        contact_link_checker = dft.ContactLinkChecker()
+        answer = "https://design.numerique.gouv.fr/contact"
+        assert contact_link_checker.execute(basic_webpage, DESIGN_NUM) == answer
+
+    def test_contact_link_checker_no_href(self):
+        test_link = "<a>Nous contacter</a>"
+        test_html = DEFAULT_HTML_HEAD + test_link + DEFAULT_HTML_TAIL
+        basic_webpage = BeautifulSoup(test_html, BS_PARSER)
+        contact_link_checker = dft.ContactLinkChecker()
+        assert contact_link_checker.execute(basic_webpage, DESIGN_NUM) == dft.FAIL
+
+    def test_contact_link_checker_bad_link(self):
+        test_link = '<a href="/foo">Nous contacter</a>'
+        test_html = DEFAULT_HTML_HEAD + test_link + DEFAULT_HTML_TAIL
+        basic_webpage = BeautifulSoup(test_html, BS_PARSER)
+        contact_link_checker = dft.ContactLinkChecker()
+        assert contact_link_checker.execute(basic_webpage, DESIGN_NUM) == dft.FAIL
