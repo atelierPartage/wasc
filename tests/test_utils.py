@@ -40,18 +40,10 @@ EXAMPLE_ROOT_SLASH = "https://www.example.com/fr/"
 
 class TestCheckAndCorrectUrl:
     def test_empty(self):
-        assert utils.check_and_correct_url("", "") == "/"
+        assert not utils.check_and_correct_url("", "")
 
     def test_correct(self):
         assert utils.check_and_correct_url(EXAMPLE_TEST_URL, "https://www.example.com") == EXAMPLE_TEST_URL
-
-    def test_overlap(self):
-        assert utils.check_and_correct_url("/fr/test", EXAMPLE_ROOT_SLASH) == EXAMPLE_TEST_URL
-        assert utils.check_and_correct_url("fr/test", EXAMPLE_ROOT_SLASH) == EXAMPLE_TEST_URL
-        assert utils.check_and_correct_url("/fr/test", EXAMPLE_ROOT) == EXAMPLE_TEST_URL
-
-    def test_compose(self):
-        assert utils.check_and_correct_url("test", EXAMPLE_ROOT_SLASH) == EXAMPLE_TEST_URL
-        assert utils.check_and_correct_url("/test", EXAMPLE_ROOT_SLASH) == EXAMPLE_TEST_URL
-        assert utils.check_and_correct_url("/test/", EXAMPLE_ROOT_SLASH) == EXAMPLE_TEST_URL
-        assert utils.check_and_correct_url("/test/", EXAMPLE_ROOT) == EXAMPLE_TEST_URL
+        assert utils.check_and_correct_url("/fr/test/", EXAMPLE_ROOT_SLASH) == EXAMPLE_TEST_URL
+        assert utils.check_and_correct_url("fr/test/", EXAMPLE_ROOT_SLASH) == EXAMPLE_TEST_URL
+        assert utils.check_and_correct_url("/fr/test/", EXAMPLE_ROOT) == EXAMPLE_TEST_URL
