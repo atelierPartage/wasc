@@ -48,7 +48,7 @@ def check_and_correct_url(target_url : str, root_url : str) -> str :
     base_url = ""
     if root.scheme and root.hostname:
         base_url = root.scheme + "://" + root.hostname
-    return str(urljoin(base_url, target_url.strip("/")))
+    return str(urljoin(base_url, target_url.strip(" /")))
 
 def find_link(access_tag, root_url):
     while access_tag and access_tag.name != "a" and access_tag.name != "html":

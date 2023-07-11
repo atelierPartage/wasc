@@ -103,10 +103,19 @@ class AccessChecker(AbstractChecker) :
         str :
             The level of accessibility or "non conforme"
         """
-        mention = web_page.find_all(string = ACCESS_PATTERN)
-        if mention :
-            return mention[0].split(":")[1].strip()
-        return FAIL
+        mention = ""
+        # 1 - Search in <footer>
+        footer = web_page.footer
+        if footer:
+            mention = footer.find_all(string = ACCESS_PATTERN)
+        # 2 - Search in id="footer" tag
+        else:
+            footer = web_page.find(id="footer")
+            if footer:
+                mention = footer.find_all(string = ACCESS_PATTERN)
+            else:
+                mention = web_page.find_all(string = ACCESS_PATTERN)
+        return mention[0].split(":")[1].strip() if mention else FAIL
 
 class AccessLinkChecker(AbstractChecker) :
     """AccessLinkChecker
@@ -114,6 +123,21 @@ class AccessLinkChecker(AbstractChecker) :
     """
     def __init__(self) :
         super().__init__("AccessLinkChecker", "Lien accessibilité")
+
+    def search_link(self, web_page, root_url):
+        # 1 - Try to find link in Mention Accessibilité
+        access_tag = web_page.find("a", string=ACCESS_PATTERN)
+        if access_tag :
+            return check_and_correct_url(access_tag.attrs["href"], root_url)
+        # 2 - Find text "accessibilité" in a link
+        access_tag = web_page.find("a", string=re.compile("accessibilit", re.IGNORECASE))
+        if access_tag :
+            return check_and_correct_url(access_tag.attrs["href"], root_url)
+        # 3 - Check if there exists a link that contains accessibilit in href
+        link_tag = web_page.find("a", href=re.compile("accessibilit", re.IGNORECASE))
+        if link_tag:
+            return check_and_correct_url(link_tag.attrs["href"], root_url)
+        return FAIL
 
     def execute(self, web_page : bs4.BeautifulSoup, root_url : str):
         """
@@ -135,27 +159,17 @@ class AccessLinkChecker(AbstractChecker) :
             "Accessibilité" / "Accessibility" is not a link, or it returns the URL of the link (str)
         """
         # 1- Check the link in the mention
-        access_tag = web_page.find(string = ACCESS_PATTERN)
-        if access_tag :
-            link = find_link(access_tag, root_url)
-            if link :
-                return link
-        # 2 - Find text "Déclaration d'accessibilité" and check if it's a link
-        access_tag = web_page.find(string = "Déclaration d'accessibilité")
-        if access_tag :
-            link = find_link(access_tag, root_url)
-            if link :
-                return link
-        # 3 - Check if there exists a link that ends with accessibilite or accessibility
-        link_tags = web_page.find_all("a")
-        for tag in link_tags:
-            try :
-                current_link = check_and_correct_url(tag.attrs["href"], root_url)
-                if current_link.endswith("accessibility") or current_link.endswith("accessibilite"):
-                    return current_link
-            except KeyError :
-                pass
-        return FAIL
+        footer = web_page.footer
+        if footer:
+            result = self.search_link(footer, root_url)
+            if result != FAIL:
+                return result
+        footer = web_page.find(id="footer")
+        if footer:
+            result = self.search_link(footer, root_url)
+            if result != FAIL:
+                return result
+        return self.search_link(web_page, root_url)
 
 class AccessRateChecker(AbstractChecker) :
     """AccessRateChecker
@@ -234,8 +248,7 @@ class LegalChecker(AbstractChecker) :
                 legal_tag = legal_tag.parent
             try :
                 legal_link = check_and_correct_url(legal_tag.attrs["href"], root_url)
-                if root_url != legal_link:
-                    return check_and_correct_url(legal_tag.attrs["href"], root_url)
+                return check_and_correct_url(legal_tag.attrs["href"], root_url)
             except KeyError :
                 pass
         legal_link = check_and_correct_url("mentions-legales", root_url)

@@ -31,4 +31,5 @@ Default checkers are listed below with their definition.
 
 ## `AccessRateChecker` (Todo)
 * Rule: if `AccessLinkChecker` is valid, get the page from the link. In this page, an accessibility rate is given as percent
+* Rule: the accessibility rate is in a tag containing "conformité" and a floating number directly followed by '%'
 * Return: the accessibility rate
