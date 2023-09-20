@@ -110,7 +110,7 @@ class AccessRateChecker(AbstractChecker) :
     Returns the compliance rate (%) on the accessibility statement if found
     """
     def __init__(self) :
-        super().__init__("AccessRateChecker", "Taux d'accessibilité")
+        super().__init__("AccessRateChecker", "Pourcentage de conformité")
 
     def execute(self, web_page : bs4.BeautifulSoup, root_url : str):
         link_url = AccessLinkChecker().execute(web_page, root_url)
@@ -127,7 +127,7 @@ class AccessRateChecker(AbstractChecker) :
                     if "conformité" in tag:
                         m = re.search(r"\s(100|(\d{1,2}([\.\,]\d+)*)) *%", str(tag))
                         if m:
-                            return str(m[1]) + "%"
+                            return str(m[1])
         except Exception:
             return FAIL
         return FAIL
