@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2023-present Guillaume Collet <bilouweb@free.fr>
 #
 # SPDX-License-Identifier: CECILL-2.1
+import datetime
 import json
 import sys
 
@@ -100,5 +101,7 @@ def wasc(websites, checkers, output_format, list_checkers, output):
         json_load = json.loads(df.to_json(force_ascii=False, orient="index"))
         click.echo(json.dumps(json_load, sort_keys=True, indent=4, ensure_ascii=False), file=output)
     elif output_format == "csv":
+        today = datetime.datetime.today()
+        output.write("# " + today.strftime("%d/%m/%y %H:%M:%S") + "\n")
         click.echo(df.to_csv(sep=";"), file=output)
     click.echo("Completed")

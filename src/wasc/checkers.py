@@ -127,7 +127,7 @@ class AccessRateChecker(AbstractChecker) :
                     if "conformité" in tag:
                         m = re.search(r"\s(100|(\d{1,2}([\.\,]\d+)*)) *%", str(tag))
                         if m:
-                            return str(m[1])
+                            return str(float(m[1]))
         except Exception:
             return FAIL
         return FAIL
