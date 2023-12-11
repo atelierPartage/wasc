@@ -20,6 +20,7 @@
 
 ## Installation
 
+Attention, l'utilisation de python > 3.12 est nécessaire car il y a des soucis d'encodage pour les versions inférieures.
 ```console
 pip install wasc
 ```
